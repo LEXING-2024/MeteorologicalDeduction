@@ -68,6 +68,7 @@ const runState = byId<HTMLSpanElement>('run-state');
 const mapTag = byId<HTMLSpanElement>('map-tag');
 const mapRegion = byId<HTMLElement>('map-region');
 const mapStamp = byId<HTMLDivElement>('map-stamp');
+const mapWrap = byId<HTMLDivElement>('map-wrap');
 const mapCanvas = byId<HTMLCanvasElement>('map-canvas');
 const metricsEl = byId<HTMLDivElement>('metrics');
 const recipeChips = byId<HTMLDivElement>('recipe-chips');
@@ -388,6 +389,23 @@ function aspectLabel(aspect: number): string {
   if (Math.abs(aspect - 16 / 9) < 0.1) return '16:9';
   if (Math.abs(aspect - 3 / 4) < 0.05) return '3:4';
   return `${aspect.toFixed(2)}:1`;
+}
+
+/** 让画布按设计画幅完整放进地图容器，不拉伸、不裁切。 */
+function fitMapCanvas(aspect: number): void {
+  const rect = mapWrap.getBoundingClientRect();
+  const boxW = Math.floor(rect.width);
+  const boxH = Math.floor(rect.height);
+  if (boxW < 10 || boxH < 10) return;
+  let width = boxW;
+  let height = width / aspect;
+  if (height > boxH) {
+    height = boxH;
+    width = height * aspect;
+  }
+  mapCanvas.style.width = `${Math.max(1, Math.round(width))}px`;
+  mapCanvas.style.height = `${Math.max(1, Math.round(height))}px`;
+  mapCanvas.style.aspectRatio = String(aspect);
 }
 
 function syncOutputs(): void {
@@ -891,9 +909,7 @@ async function newSimulation(runAll: boolean): Promise<void> {
     level = buildSandboxLevel(config);
     mapRegion.textContent = `${TERRAIN_OPTIONS.find((item) => item.value === config.terrain)?.label ?? '平原'} · ${config.domainKm} km`;
     const aspect = level.scene.map?.aspect ?? 1;
-    mapCanvas.style.aspectRatio = String(aspect);
-    mapCanvas.style.width = aspect >= 1 ? '100%' : 'auto';
-    mapCanvas.style.height = aspect >= 1 ? 'auto' : '100%';
+    fitMapCanvas(aspect);
     sim = new SimulationClient(level);
     frames = [sim.initialFrame];
     viewIndex = 0;
@@ -1096,6 +1112,10 @@ function bindControls(): void {
     setViewIndex(Number(timeline.value));
   });
   window.addEventListener('resize', () => {
+    if (level) {
+      fitMapCanvas(level.scene.map?.aspect ?? 1);
+      map?.resize(true);
+    }
     if (frames.length) renderProfile(frames[viewIndex]);
     renderSeries();
   });

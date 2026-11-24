@@ -586,9 +586,9 @@ function buildTerrainCanvas(
   grid: Grid,
   coastField: Float32Array,
 ): HTMLCanvasElement {
-  // 底图缓存一次生成、每帧只做一次 drawImage。512² 足够在 2× DPR
-  // 下保留等高线/山脊细节，同时比逐帧重画地形便宜得多。
-  const res = 512;
+  // 底图缓存一次生成、每帧只做一次 drawImage。1024² 让 800px 级地图
+  // 在 2× DPR 下仍有足够细节，避免地形被放大成一团模糊绿斑。
+  const res = 1024;
   const canvas = document.createElement('canvas');
   canvas.width = res;
   canvas.height = res;
@@ -936,7 +936,6 @@ export class MapView {
   private cloudCanvas: HTMLCanvasElement;
   private rainCanvas: HTMLCanvasElement;
   private tempCanvas: HTMLCanvasElement;
-  private tempRange: { min: number; max: number } | null = null;
   private tempField64: Float64Array | null = null;
   private tempFieldFrame: Frame | null = null;
 
@@ -1026,7 +1025,7 @@ export class MapView {
 
   resize(force = false): void {
     const rect = this.canvas.getBoundingClientRect();
-    this.dpr = Math.min(1.6, window.devicePixelRatio || 1);
+    this.dpr = Math.min(2, window.devicePixelRatio || 1);
     const width = Math.max(300, Math.round(rect.width));
     const height = Math.max(300, Math.round(rect.height));
     const same =
@@ -1098,10 +1097,6 @@ export class MapView {
     this.drawStations(ctx, frame);
     this.drawFrame(ctx);
     this.drawNeatline(ctx, width, height);
-    if (this.layers.temp && this.tempRange) {
-      this.drawTempLegend(ctx, this.tempRange.min, this.tempRange.max);
-    }
-    if (this.layers.rain) this.drawPrecipLegend(ctx);
     if (this.ghost && (this.ghostPoint ?? this.pointerKm)) this.drawGhost(ctx);
     ctx.restore();
   }
@@ -1152,15 +1147,15 @@ export class MapView {
     if (this.scene.terrain.kind === 'valley') return;
     const dx = this.scene.domainKm / this.grid.n;
     const zoom = this.projection.zoom;
-    // 全图视角保持很轻：等高线只作辅助，不能盖过地貌本身的明暗。
-    const opacity = clamp(0.09 + (zoom - 1) * 0.16, 0.09, 0.36);
+    // 全图视角保持轻：等高线只作辅助，不能盖过地貌本身的明暗。
+    const opacity = clamp(0.12 + (zoom - 1) * 0.16, 0.12, 0.38);
     ctx.save();
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
     for (const contour of this.terrainContours) {
       const major = contour.value % 500 === 0;
-      ctx.strokeStyle = `rgba(26,48,38,${opacity * (major ? 1.1 : 0.62)})`;
-      ctx.lineWidth = major ? 0.9 : 0.55;
+      ctx.strokeStyle = `rgba(22,44,34,${opacity * (major ? 1.15 : 0.6)})`;
+      ctx.lineWidth = major ? 1.05 : 0.7;
       ctx.beginPath();
       contour.points.forEach((point, index) => {
         const s = this.projection.toScreen((point.x + 0.5) * dx, (point.y + 0.5) * dx);
@@ -1208,9 +1203,9 @@ export class MapView {
 
     ctx.save();
     ctx.strokeStyle = `rgba(180,212,228,${0.055 * scale})`;
-    ctx.fillStyle = `rgba(158,188,204,${0.5 * scale})`;
+    ctx.fillStyle = `rgba(170,200,216,${0.62 * scale})`;
     ctx.lineWidth = 1;
-    ctx.font = '9px "JetBrains Mono", monospace';
+    ctx.font = '10px "JetBrains Mono", monospace';
     const top = scene.centerLat + latSpan / 2;
     const firstLat = Math.ceil((top - latSpan) / stepLat) * stepLat;
     for (let lat = firstLat; lat <= top + 1e-6; lat += stepLat) {
@@ -1265,11 +1260,13 @@ export class MapView {
               : 'rgba(214,222,210,0.88)';
       ctx.font =
         kind === 'range'
-          ? 'italic 10.5px "Noto Serif SC", "Songti SC", serif'
-          : '600 10.5px "Noto Sans SC", system-ui, sans-serif';
+          ? 'italic 12.5px "Noto Serif SC", "Songti SC", serif'
+          : '600 12.5px "Noto Sans SC", system-ui, sans-serif';
       ctx.fillStyle = color;
-      ctx.shadowColor = 'rgba(0,0,0,0.65)';
-      ctx.shadowBlur = 3;
+      // 先描一圈暗边再填字，避免文字直接落在绿色底图上时发虚。
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = 'rgba(4,11,15,0.62)';
+      ctx.strokeText(label.text, s.x, s.y);
       ctx.fillText(label.text, s.x, s.y);
       if (kind === 'pass') {
         ctx.beginPath();
@@ -1291,8 +1288,11 @@ export class MapView {
     // 图幅名放在底部中央，像一张天气图的图名。
     if (design.region) {
       ctx.textAlign = 'center';
-      ctx.font = '600 10px "JetBrains Mono", "Noto Sans SC", monospace';
-      ctx.fillStyle = 'rgba(202,218,220,0.58)';
+      ctx.font = '600 11.5px "JetBrains Mono", "Noto Sans SC", monospace';
+      ctx.fillStyle = 'rgba(208,224,226,0.78)';
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = 'rgba(4,11,15,0.55)';
+      ctx.strokeText(design.region, width / 2, height - 12);
       ctx.fillText(design.region, width / 2, height - 12);
     }
     ctx.restore();
@@ -1310,7 +1310,6 @@ export class MapView {
       if (field[k] < min) min = field[k];
       if (field[k] > max) max = field[k];
     }
-    this.tempRange = { min, max };
 
     const image = c.createImageData(n, n);
     const data = image.data;
@@ -1352,7 +1351,7 @@ export class MapView {
       ctx.stroke();
     }
 
-    ctx.font = '600 9.5px "JetBrains Mono", monospace';
+    ctx.font = '600 10.5px "JetBrains Mono", monospace';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     const labeled = new Map<number, (typeof contours)[number]>();
@@ -1367,9 +1366,9 @@ export class MapView {
       const point = contour.points[mid];
       const s = this.projection.toScreen((point.x + 0.5) * dx, (point.y + 0.5) * dx);
       const text = `${Math.round(contour.value)}℃`;
-      const w = ctx.measureText(text).width + 6;
-      ctx.fillStyle = 'rgba(6,12,18,0.78)';
-      ctx.fillRect(s.x - w / 2, s.y - 5.5, w, 11);
+      const w = ctx.measureText(text).width + 7;
+      ctx.fillStyle = 'rgba(6,12,18,0.82)';
+      ctx.fillRect(s.x - w / 2, s.y - 6, w, 12);
       ctx.fillStyle =
         contour.value >= 22
           ? 'rgba(238,190,150,0.9)'
@@ -1377,46 +1376,6 @@ export class MapView {
             ? 'rgba(170,212,240,0.9)'
             : 'rgba(220,224,202,0.88)';
       ctx.fillText(text, s.x, s.y + 0.4);
-    }
-    ctx.restore();
-  }
-
-  private drawTempLegend(ctx: CanvasRenderingContext2D, min: number, max: number): void {
-    const width = this.canvas.width / this.dpr;
-    const height = this.canvas.height / this.dpr;
-    const barW = 112;
-    const barH = 7;
-    const x = width - barW - 14;
-    const y = height - 30;
-    const lo = -10;
-    const hi = 35;
-    const gradient = ctx.createLinearGradient(x, 0, x + barW, 0);
-    for (const stop of TEMP_RAMP) {
-      gradient.addColorStop(clamp((stop[0] - lo) / (hi - lo), 0, 1), `rgb(${stop[1]},${stop[2]},${stop[3]})`);
-    }
-    ctx.save();
-    ctx.fillStyle = 'rgba(6,12,18,0.78)';
-    this.roundRect(ctx, x - 7, y - 22, barW + 14, 39, 5);
-    ctx.fill();
-    ctx.font = '600 9px "JetBrains Mono", monospace';
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = 'rgba(214,228,236,0.9)';
-    ctx.fillText('实际气温', x, y - 11);
-    ctx.textAlign = 'right';
-    ctx.fillStyle = 'rgba(188,208,220,0.8)';
-    ctx.fillText(`${min.toFixed(0)}–${max.toFixed(0)}℃`, x + barW, y - 11);
-    ctx.fillStyle = gradient;
-    ctx.fillRect(x, y, barW, barH);
-    ctx.strokeStyle = 'rgba(198,218,228,0.22)';
-    ctx.lineWidth = 0.8;
-    ctx.strokeRect(x, y, barW, barH);
-    ctx.font = '500 7.5px "JetBrains Mono", monospace';
-    ctx.textAlign = 'center';
-    ctx.fillStyle = 'rgba(160,184,198,0.72)';
-    for (const tick of [0, 10, 20, 30]) {
-      const tx = x + ((tick - lo) / (hi - lo)) * barW;
-      ctx.fillText(String(tick), tx, y + 15);
     }
     ctx.restore();
   }
@@ -1519,7 +1478,7 @@ export class MapView {
 
     // 每隔 8 hPa 标注一次；同一数值只标最长的一条，避免边界上
     // 多条同值等压线重复堆字。文字底下垫底色，避免与线条打结。
-    ctx.font = '600 9.5px "JetBrains Mono", monospace';
+    ctx.font = '600 10.5px "JetBrains Mono", monospace';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     const labeled = new Map<number, (typeof contours)[number]>();
@@ -1670,13 +1629,13 @@ export class MapView {
       ctx.fillText(center.type, s.x, s.y + 0.5);
 
       const label = `${Math.round(absolutePressureHpa(center.value))} hPa`;
-      ctx.font = '600 9.5px "JetBrains Mono", monospace';
-      const w = ctx.measureText(label).width + 8;
-      ctx.fillStyle = 'rgba(6,12,18,0.8)';
-      this.roundRect(ctx, s.x - w / 2, s.y + 14, w, 13, 3);
+      ctx.font = '600 10.5px "JetBrains Mono", monospace';
+      const w = ctx.measureText(label).width + 9;
+      ctx.fillStyle = 'rgba(6,12,18,0.84)';
+      this.roundRect(ctx, s.x - w / 2, s.y + 14, w, 14, 3);
       ctx.fill();
-      ctx.fillStyle = 'rgba(212,228,236,0.86)';
-      ctx.fillText(label, s.x, s.y + 20.8);
+      ctx.fillStyle = 'rgba(218,232,240,0.92)';
+      ctx.fillText(label, s.x, s.y + 21.2);
       ctx.restore();
     }
   }
@@ -1717,18 +1676,18 @@ export class MapView {
 
       const label = site.name;
       const value = `${Math.round(absolutePressureHpa(site.p))} hPa · ${site.t2m.toFixed(1)}℃`;
-      ctx.font = '600 10.5px "Noto Sans SC", sans-serif';
+      ctx.font = '600 11.5px "Noto Sans SC", sans-serif';
       const nameW = ctx.measureText(label).width;
-      ctx.font = '600 9.5px "JetBrains Mono", monospace';
+      ctx.font = '600 10.5px "JetBrains Mono", monospace';
       const valueW = ctx.measureText(value).width;
-      const w = nameW + valueW + 17;
-      const h = 17;
-      const right = { x: s.x + 9, y: s.y - 19, w, h };
-      const left = { x: s.x - w - 9, y: s.y - 19, w, h };
-      const rightBelow = { x: s.x + 9, y: s.y + 9, w, h };
-      const leftBelow = { x: s.x - w - 9, y: s.y + 9, w, h };
-      const above = { x: s.x - w / 2, y: s.y - 32, w, h };
-      const below = { x: s.x - w / 2, y: s.y + 12, w, h };
+      const w = nameW + valueW + 19;
+      const h = 19;
+      const right = { x: s.x + 9, y: s.y - 21, w, h };
+      const left = { x: s.x - w - 9, y: s.y - 21, w, h };
+      const rightBelow = { x: s.x + 9, y: s.y + 10, w, h };
+      const leftBelow = { x: s.x - w - 9, y: s.y + 10, w, h };
+      const above = { x: s.x - w / 2, y: s.y - 35, w, h };
+      const below = { x: s.x - w / 2, y: s.y + 13, w, h };
       const order =
         s.x > width * 0.68
           ? [left, right, leftBelow, rightBelow, above, below]
@@ -1770,13 +1729,13 @@ export class MapView {
 
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
-      ctx.font = '600 10.5px "Noto Sans SC", sans-serif';
-      ctx.fillStyle = 'rgba(222,235,242,0.94)';
-      ctx.fillText(label, box.x + 6, box.y + 8.5);
+      ctx.font = '600 11.5px "Noto Sans SC", sans-serif';
+      ctx.fillStyle = 'rgba(228,239,244,0.96)';
+      ctx.fillText(label, box.x + 6, box.y + 9.5);
 
-      ctx.font = '600 9.5px "JetBrains Mono", monospace';
-      ctx.fillStyle = site.p <= -6 ? 'rgba(140,208,232,0.95)' : site.p >= 6 ? 'rgba(230,186,132,0.95)' : 'rgba(196,214,224,0.9)';
-      ctx.fillText(value, box.x + 6 + nameW + 6, box.y + 8.5);
+      ctx.font = '600 10.5px "JetBrains Mono", monospace';
+      ctx.fillStyle = site.p <= -6 ? 'rgba(140,208,232,0.96)' : site.p >= 6 ? 'rgba(230,186,132,0.96)' : 'rgba(202,220,228,0.94)';
+      ctx.fillText(value, box.x + 6 + nameW + 6, box.y + 9.5);
       ctx.restore();
     }
   }
@@ -1822,42 +1781,11 @@ export class MapView {
     ctx.moveTo(x0 + px, y0 - 3);
     ctx.lineTo(x0 + px, y0 + 3);
     ctx.stroke();
-    ctx.fillStyle = 'rgba(196,216,226,0.68)';
-    ctx.font = '9px "JetBrains Mono", monospace';
+    ctx.fillStyle = 'rgba(204,222,230,0.8)';
+    ctx.font = '10px "JetBrains Mono", monospace';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'bottom';
     ctx.fillText(`${km} km`, x0, y0 - 4);
-    ctx.restore();
-  }
-
-  private drawPrecipLegend(ctx: CanvasRenderingContext2D): void {
-    const a = this.projection.toScreen(0, this.scene.domainKm);
-    const b = this.projection.toScreen(this.scene.domainKm, 0);
-    const items: { label: string; color: RGB }[] = [
-      { label: '雨', color: [88, 178, 240] },
-      { label: '雨夹雪', color: [206, 196, 255] },
-      { label: '雪', color: [232, 244, 255] },
-      { label: '冻雨', color: [246, 168, 206] },
-      { label: '冰雹', color: [255, 232, 170] },
-    ];
-    ctx.save();
-    ctx.font = '9px "Noto Sans SC", sans-serif';
-    ctx.textBaseline = 'middle';
-    ctx.textAlign = 'left';
-    let x = a.x + 16;
-    const y = b.y - 48;
-    ctx.fillStyle = 'rgba(196,216,226,0.62)';
-    ctx.fillText('降水相态', x, y);
-    x += 58;
-    for (const item of items) {
-      ctx.fillStyle = `rgb(${item.color[0]},${item.color[1]},${item.color[2]})`;
-      ctx.beginPath();
-      ctx.arc(x + 3, y, 3, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = 'rgba(196,216,226,0.68)';
-      ctx.fillText(item.label, x + 9, y);
-      x += 9 + ctx.measureText(item.label).width + 12;
-    }
     ctx.restore();
   }
 

@@ -700,7 +700,7 @@ body.v2-focus-map .v2-map .map-stage {
   margin-top: -1px;
   color: var(--v2-faint);
   font-family: var(--v2-mono);
-  font-size: 8px;
+  font-size: 9px;
 }
 
 .legend-ticks i {
@@ -868,13 +868,13 @@ body.v2-focus-map .v2-map .map-stage {
 
 #map-canvas {
   position: absolute;
-  left: 0;
-  right: 0;
+  left: 50%;
+  right: auto;
   top: 50%;
   display: block;
-  width: 100%;
+  width: auto;
   height: auto;
-  transform: translateY(-50%);
+  transform: translate(-50%, -50%);
   box-shadow: 0 0 0 1px rgba(103, 214, 194, 0.16), 0 12px 32px rgba(0, 0, 0, 0.45);
   touch-action: none;
   cursor: grab;
@@ -887,11 +887,11 @@ body.v2-focus-map .v2-map .map-stage {
   padding: 4px 8px;
   border: 1px solid var(--v2-line);
   border-radius: 4px;
-  color: var(--v2-muted);
-  background: rgba(6, 12, 18, 0.72);
+  color: var(--v2-soft);
+  background: rgba(6, 12, 18, 0.82);
   backdrop-filter: blur(5px);
   font-family: var(--v2-mono);
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: 0.04em;
   pointer-events: none;
 }
@@ -970,87 +970,56 @@ body.v2-focus-map .v2-map .map-stage {
   font-size: 10px;
 }
 
-.map-hint {
-  position: absolute;
-  right: 12px;
-  bottom: 10px;
+.map-footer {
+  flex: 0 0 auto;
   display: flex;
-  gap: 9px;
-  color: rgba(112, 135, 151, 0.7);
-  font-family: var(--v2-mono);
-  font-size: 8.5px;
-  pointer-events: none;
-}
-
-.map-empty {
-  position: absolute;
-  left: 50%;
-  bottom: 46px;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  width: max-content;
-  max-width: 78%;
-  padding: 12px 18px;
-  border: 1px solid rgba(132, 211, 230, 0.24);
-  border-radius: 9px;
-  background: rgba(7, 17, 24, 0.82);
-  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.42);
-  backdrop-filter: blur(6px);
-  transform: translateX(-50%);
-  pointer-events: none;
-  text-align: center;
-  animation: v2-rise 0.3s ease-out;
-}
-
-.map-empty-kicker {
-  color: var(--v2-cyan);
-  font-family: var(--v2-mono);
-  font-size: 8.5px;
-  letter-spacing: 0.18em;
-}
-
-.map-empty b {
-  color: var(--v2-text);
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-}
-
-.map-empty span:last-child {
-  color: var(--v2-muted);
-  font-size: 10.5px;
-}
-
-.map-hint span::before {
-  content: '·';
-  margin-right: 5px;
-  color: var(--v2-faint);
-}
-
-/* 底图高程图例：跟随地图，而不是占侧栏。 */
-.terrain-legend {
-  position: absolute;
-  top: 38px;
-  left: 12px;
-  display: grid;
-  grid-template-columns: auto 82px;
-  gap: 2px 7px;
   align-items: center;
-  padding: 5px 7px;
-  border: 1px solid rgba(157, 193, 212, 0.16);
-  border-radius: 4px;
-  background: rgba(6, 12, 18, 0.72);
-  backdrop-filter: blur(5px);
-  pointer-events: none;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  padding: 7px 12px 6px;
+  border-top: 1px solid var(--v2-line);
+  background: rgba(8, 14, 20, 0.9);
 }
 
-.terrain-legend-title {
-  grid-row: span 2;
-  color: var(--v2-muted);
+.map-legend {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  min-width: 0;
+}
+
+.legend-group {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.legend-group-label {
+  color: var(--v2-soft);
   font-family: var(--v2-mono);
-  font-size: 8.5px;
-  letter-spacing: 0.12em;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.map-footer .legend-ticks {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  width: auto;
+  margin: 0;
+  color: rgba(160, 184, 198, 0.82);
+  font-family: var(--v2-mono);
+  font-size: 9px;
+}
+
+.legend-readout {
+  color: var(--v2-text);
+  font-family: var(--v2-mono);
+  font-size: 10px;
+  white-space: nowrap;
 }
 
 .terrain-ramp {
@@ -1071,13 +1040,83 @@ body.v2-focus-map .v2-map .map-stage {
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
 }
 
-.terrain-ticks {
-  display: flex;
-  justify-content: space-between;
+.temp-ramp {
   width: 82px;
-  color: var(--v2-faint);
+  height: 6px;
+  border-radius: 2px;
+  background: linear-gradient(
+    90deg,
+    #2c4284 0%,
+    #3660aa 15%,
+    #3e8ac2 30%,
+    #58bcc3 45%,
+    #d0d096 60%,
+    #ecb262 75%,
+    #ec8050 88%,
+    #ee5848 100%
+  );
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.phase-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: rgba(184, 204, 214, 0.88);
   font-family: var(--v2-mono);
-  font-size: 7.5px;
+  font-size: 9.5px;
+  white-space: nowrap;
+}
+
+.phase-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.phase-rain { background: #58b2f0; }
+.phase-sleet { background: #cec4ff; }
+.phase-snow { background: #e8f4ff; }
+.phase-freezing { background: #f6a8ce; }
+.phase-hail { background: #ffe8aa; }
+
+.map-hint {
+  display: flex;
+  gap: 9px;
+  margin-left: auto;
+  color: rgba(150, 176, 190, 0.82);
+  font-family: var(--v2-mono);
+  font-size: 9.5px;
+  white-space: nowrap;
+}
+
+.map-hint span::before {
+  content: '·';
+  margin-right: 5px;
+  color: var(--v2-faint);
+}
+
+.deck-empty-note {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 8px 10px 0;
+  padding: 7px 9px;
+  border-left: 2px solid rgba(132, 211, 230, 0.5);
+  background: rgba(132, 211, 230, 0.045);
+}
+
+.deck-empty-note b {
+  color: var(--v2-text);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.deck-empty-note span {
+  color: var(--v2-muted);
+  font-size: 10px;
+  line-height: 1.5;
 }
 
 /* ── 时间轴 ─────────────────────────────────────────────────────────────── */
@@ -1312,22 +1351,6 @@ body.v2-focus-map .v2-map .map-stage {
 .tick:disabled {
   opacity: 0.5;
 }
-
-/* ── 地图底部 ───────────────────────────────────────────────────────────── */
-
-.map-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  flex: 0 0 auto;
-  height: 52px;
-  padding: 0 14px;
-  border-top: 1px solid var(--v2-line);
-  background: linear-gradient(0deg, rgba(13, 22, 31, 0.85), rgba(8, 13, 19, 0.7));
-}
-
-/* 回合信息与推进按钮已并入时间轴顶栏，见 .timeline-head。 */
 
 /* ── 卡组 ───────────────────────────────────────────────────────────────── */
 

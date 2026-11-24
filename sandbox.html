@@ -60,16 +60,16 @@
     button.action:disabled { opacity:.45; cursor:not-allowed; }
     .preset-note { margin:0 12px 8px; color:var(--muted); font:11px/1.55 var(--mono); }
     .stage { min-height:0; display:flex; flex-direction:column; overflow:hidden; }
-    .map-wrap { position:relative; flex:none; aspect-ratio:1 / 1; background:radial-gradient(ellipse at 50% 45%, #0b2227, #061417 72%); display:flex; align-items:center; justify-content:center; overflow:hidden; }
-    #map-canvas { display:block; box-shadow:0 0 0 1px rgba(103,214,194,.18), 0 12px 32px rgba(0,0,0,.45); }
-    .map-head { position:absolute; left:18px; top:13px; right:18px; pointer-events:none; display:flex; align-items:baseline; gap:9px; color:rgba(226,240,236,.82); text-shadow:0 1px 6px rgba(0,0,0,.65); }
+    .map-wrap { position:relative; flex:1 1 auto; min-height:0; background:radial-gradient(ellipse at 50% 45%, #0b2227, #061417 72%); display:flex; align-items:center; justify-content:center; overflow:hidden; }
+    #map-canvas { display:block; max-width:100%; max-height:100%; box-shadow:0 0 0 1px rgba(103,214,194,.18), 0 12px 32px rgba(0,0,0,.45); }
+    .map-head { position:absolute; left:18px; top:13px; right:18px; pointer-events:none; display:flex; align-items:baseline; gap:9px; color:rgba(226,240,236,.82); text-shadow:0 1px 6px rgba(0,0,0,.65); z-index:2; }
     .map-head .map-kicker { color:rgba(103,214,194,.68); font:9px var(--mono); letter-spacing:.22em; }
     .map-head b { font:600 12px var(--sans); letter-spacing:.04em; }
-    .map-overlay { position:absolute; left:12px; bottom:12px; right:12px; pointer-events:none; display:flex; justify-content:space-between; align-items:flex-end; gap:10px; }
-    .legend { background:rgba(4,17,20,.81); border:1px solid rgba(28,65,71,.9); border-radius:8px; padding:7px 9px; font:10px var(--mono); color:var(--muted); display:flex; flex-wrap:wrap; gap:8px 12px; }
+    .map-footer { flex:none; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:6px 12px; padding:7px 12px; border-top:1px solid var(--line); background:rgba(4,17,20,.55); }
+    .legend { background:none; border:0; border-radius:0; padding:0; font:10px var(--mono); color:var(--muted); display:flex; flex-wrap:wrap; gap:8px 12px; }
     .legend b { color:var(--text); font-weight:500; }
     .swatch { width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:4px; vertical-align:1px; }
-    .map-stamp { text-align:right; text-shadow:0 1px 4px #000; color:var(--muted); font:10px var(--mono); }
+    .map-stamp { text-align:right; color:var(--muted); font:10px var(--mono); }
     .timeline { display:flex; align-items:center; gap:9px; padding:9px 12px 10px; border-top:1px solid var(--line); background:rgba(4,17,20,.5); }
     .timeline button { width:30px; height:26px; border:1px solid var(--line); background:#102b31; color:var(--teal); border-radius:5px; cursor:pointer; }
     .timeline input { flex:1; accent-color:var(--amber); }
@@ -196,17 +196,17 @@
             <span class="map-kicker">SYNOPTIC MAP</span>
             <b id="map-region">场景地图</b>
           </div>
-          <div class="map-overlay">
-            <div class="legend">
-              <span><b>相态</b></span>
-              <span><i class="swatch" style="background:#79b8ff"></i>雨</span>
-              <span><i class="swatch" style="background:#c5a3ff"></i>雨夹雪</span>
-              <span><i class="swatch" style="background:#e8f3ef"></i>雪</span>
-              <span><i class="swatch" style="background:#ff8ba7"></i>冻雨</span>
-              <span><i class="swatch" style="background:#f2b866"></i>冰雹</span>
-            </div>
-            <div class="map-stamp" id="map-stamp">sandbox / no level</div>
+        </div>
+        <div class="map-footer">
+          <div class="legend">
+            <span><b>相态</b></span>
+            <span><i class="swatch" style="background:#79b8ff"></i>雨</span>
+            <span><i class="swatch" style="background:#c5a3ff"></i>雨夹雪</span>
+            <span><i class="swatch" style="background:#e8f3ef"></i>雪</span>
+            <span><i class="swatch" style="background:#ff8ba7"></i>冻雨</span>
+            <span><i class="swatch" style="background:#f2b866"></i>冰雹</span>
           </div>
+          <div class="map-stamp" id="map-stamp">sandbox / no level</div>
         </div>
         <div class="timeline">
           <button id="play" type="button" aria-label="播放">▶</button>

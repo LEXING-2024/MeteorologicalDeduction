@@ -51,8 +51,26 @@ const mapReadout = byId<HTMLDivElement>('map-readout');
 const mapTag = byId<HTMLDivElement>('map-tag');
 const historyChip = byId<HTMLDivElement>('history-chip');
 const placementToast = byId<HTMLDivElement>('placement-toast');
-const mapEmpty = byId<HTMLDivElement>('map-empty');
+const deckEmpty = byId<HTMLDivElement>('deck-empty');
 const terrainLegendTitle = byId<HTMLSpanElement>('terrain-legend-title');
+const tempLegendRange = byId<HTMLSpanElement>('temp-legend-range');
+
+/** 按设计画幅把画布放进地图舞台，避免 canvas 被舞台高度拉伸或裁切。 */
+function fitMapCanvas(aspect: number): void {
+  const rect = mapStage.getBoundingClientRect();
+  const stageW = Math.floor(rect.width);
+  const stageH = Math.floor(rect.height);
+  if (stageW < 10 || stageH < 10) return;
+  let width = stageW;
+  let height = width / aspect;
+  if (height > stageH) {
+    height = stageH;
+    width = height * aspect;
+  }
+  mapCanvas.style.width = `${Math.max(1, Math.round(width))}px`;
+  mapCanvas.style.height = `${Math.max(1, Math.round(height))}px`;
+  mapCanvas.style.aspectRatio = String(aspect);
+}
 
 const levelTitleEl = byId<HTMLHeadingElement>('level-title');
 const levelKicker = byId<HTMLSpanElement>('level-kicker');
@@ -129,6 +147,7 @@ let level: LevelDef;
 let levelIndex = 0;
 let sim: SimulationClient;
 let map: MapView | null = null;
+let currentMapAspect = 1;
 let frames: readonly Frame[] = [];
 let viewIndex = 0;
 let selected: Selection | null = null;
@@ -369,9 +388,8 @@ function startLevel(index: number): void {
 
   if (map) map.destroy();
   const mapAspect = level.scene.map?.aspect ?? 1;
-  mapCanvas.style.aspectRatio = String(mapAspect);
-  mapCanvas.style.width = mapAspect >= 1 ? '100%' : 'auto';
-  mapCanvas.style.height = mapAspect >= 1 ? 'auto' : '100%';
+  currentMapAspect = mapAspect;
+  fitMapCanvas(mapAspect);
   map = new MapView(mapCanvas, level.scene, sim.grid, sim.fields, {
     onCanvasClick: onCanvasClick,
     onHover: onHover,
@@ -883,6 +901,7 @@ function renderFrame(): void {
   )} hPa · 气温 ${fixed(frame.stats.minTemp, 0)}–${fixed(frame.stats.maxTemp, 0)}℃ · 降水 ${
     dominant === '—' ? '无' : dominant
   } · PW ${fixed(frame.stats.meanPwMm ?? 0, 0)} mm`;
+  tempLegendRange.textContent = `${fixed(frame.stats.minTemp, 0)}–${fixed(frame.stats.maxTemp, 0)}℃`;
   historyChip.hidden = isLatest();
   timelineNote.textContent = isLatest() ? `当前 h+${frame.hour}` : `回看 h+${frame.hour}`;
 
@@ -898,7 +917,7 @@ function renderFrame(): void {
   if (selected && !isLatest()) {
     placementToast.hidden = true;
   }
-  mapEmpty.hidden = !(
+  deckEmpty.hidden = !(
     !selected &&
     sim.actionsUsed === 0 &&
     sim.currentHour === 0 &&
@@ -1483,9 +1502,15 @@ function bindEvents(): void {
     if (levelIndex < VOLUME1.length - 1) startLevel(levelIndex + 1);
   });
 
-  window.addEventListener('resize', () => map?.resize());
+  window.addEventListener('resize', () => {
+    fitMapCanvas(currentMapAspect);
+    map?.resize(true);
+  });
   if ('ResizeObserver' in window) {
-    const observer = new ResizeObserver(() => map?.resize());
+    const observer = new ResizeObserver(() => {
+      fitMapCanvas(currentMapAspect);
+      map?.resize(true);
+    });
     observer.observe(mapStage);
   }
 
