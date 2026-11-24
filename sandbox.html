@@ -60,8 +60,9 @@
     button.action:disabled { opacity:.45; cursor:not-allowed; }
     .preset-note { margin:0 12px 8px; color:var(--muted); font:11px/1.55 var(--mono); }
     .stage { min-height:0; display:flex; flex-direction:column; overflow:hidden; }
-    .map-wrap { position:relative; flex:1 1 auto; min-height:0; background:radial-gradient(ellipse at 50% 45%, #0b2227, #061417 72%); display:flex; align-items:center; justify-content:center; overflow:hidden; }
-    #map-canvas { display:block; max-width:100%; max-height:100%; box-shadow:0 0 0 1px rgba(103,214,194,.18), 0 12px 32px rgba(0,0,0,.45); }
+    .map-wrap { position:relative; flex:1 1 auto; min-height:0; background:linear-gradient(180deg,#09151d,#040a10); display:flex; align-items:center; justify-content:center; overflow:hidden; }
+    #map-canvas { display:block; max-width:100%; max-height:100%; border-radius:8px; box-shadow:0 0 0 1px rgba(120,198,214,.14), 0 18px 46px rgba(0,0,0,.46); }
+    .map-ghost-canvas { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); display:block; max-width:100%; max-height:100%; border-radius:8px; pointer-events:none; z-index:1; }
     .map-head { position:absolute; left:18px; top:13px; right:18px; pointer-events:none; display:flex; align-items:baseline; gap:9px; color:rgba(226,240,236,.82); text-shadow:0 1px 6px rgba(0,0,0,.65); z-index:2; }
     .map-head .map-kicker { color:rgba(103,214,194,.68); font:9px var(--mono); letter-spacing:.22em; }
     .map-head b { font:600 12px var(--sans); letter-spacing:.04em; }

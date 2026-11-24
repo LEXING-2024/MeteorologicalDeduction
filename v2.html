@@ -126,7 +126,24 @@
             <canvas id="map-canvas" aria-label="天气图画布"></canvas>
             <div id="map-tag" class="map-chip">海平面气压 · 实际气温</div>
             <div id="history-chip" class="map-chip map-chip-history" hidden>回看中</div>
-            <div id="map-readout" class="map-readout" hidden></div>
+            <div id="map-readout" class="map-readout" hidden>
+              <div class="readout-head">
+                <b id="readout-pos">—</b>
+                <span><em id="readout-p">—</em> hPa</span>
+              </div>
+              <div class="readout-grid">
+                <span>气温<em id="readout-t">—</em>℃</span>
+                <span>体感<em id="readout-apparent">—</em>℃</span>
+                <span>风<em id="readout-wind">—</em> m/s</span>
+                <span>降水<em id="readout-rain">—</em> mm/h</span>
+                <span>云<em id="readout-cloud">—</em>%</span>
+                <span>相态<em id="readout-phase">—</em></span>
+                <span>PW<em id="readout-pw">—</em> mm</span>
+                <span>平流<em id="readout-advection">—</em></span>
+                <span>850<em id="readout-t850">—</em>℃</span>
+                <span>500<em id="readout-t500">—</em>℃</span>
+              </div>
+            </div>
             <div id="placement-toast" class="placement-toast" hidden>
               <b>选好落点</b><span>点击放置 · 方向键微调 · 回车确认</span>
             </div>

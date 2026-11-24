@@ -82,132 +82,137 @@ interface MapPaletteSpec {
   rock: RGB;
 }
 
+/**
+ * 现代气象底图色板：低地偏冷灰绿、山地偏蓝灰、海水保持深海军蓝，
+ * 避免旧版橄榄绿 + 土黄的“复古纸图”观感。气候区仍有区分，但统一在
+ * 冷色体系里，和界面青蓝色保持一致。
+ */
 const MAP_PALETTES: Record<MapPalette, MapPaletteSpec> = {
   temperate: {
     ramp: [
-      [0, 56, 80, 60],
-      [80, 64, 88, 64],
-      [200, 74, 100, 68],
-      [500, 96, 124, 74],
-      [900, 118, 138, 90],
-      [1400, 140, 146, 100],
-      [2200, 172, 172, 136],
-      [3200, 204, 202, 180],
+      [0, 65, 92, 82],
+      [80, 74, 101, 90],
+      [200, 85, 110, 98],
+      [500, 97, 120, 108],
+      [900, 111, 131, 120],
+      [1400, 129, 146, 136],
+      [2200, 163, 177, 170],
+      [3200, 212, 222, 219],
     ],
-    deep: [5, 15, 27],
-    shelf: [16, 52, 64],
-    vegetation: 0.22,
-    plant: [32, 76, 44],
-    snowLine: 2500,
-    rock: [142, 146, 136],
+    deep: [8, 23, 38],
+    shelf: [24, 74, 88],
+    vegetation: 0.12,
+    plant: [54, 100, 84],
+    snowLine: 2600,
+    rock: [128, 142, 143],
   },
   coastal: {
     ramp: [
-      [0, 38, 58, 48],
-      [90, 44, 68, 52],
-      [260, 54, 88, 58],
-      [600, 82, 118, 70],
-      [1100, 116, 142, 86],
-      [1700, 148, 158, 108],
-      [2500, 180, 184, 150],
-      [3400, 210, 212, 190],
+      [0, 70, 91, 87],
+      [90, 79, 100, 95],
+      [260, 89, 109, 103],
+      [600, 101, 120, 112],
+      [1100, 114, 132, 123],
+      [1700, 135, 151, 141],
+      [2500, 168, 181, 172],
+      [3400, 214, 224, 220],
     ],
-    deep: [4, 16, 28],
-    shelf: [14, 62, 76],
-    vegetation: 0.34,
-    plant: [22, 78, 46],
+    deep: [7, 21, 36],
+    shelf: [28, 92, 104],
+    vegetation: 0.16,
+    plant: [52, 104, 92],
     snowLine: 2800,
-    rock: [138, 146, 138],
+    rock: [126, 142, 142],
   },
   arid: {
     ramp: [
-      [0, 76, 62, 40],
-      [100, 102, 82, 50],
-      [300, 132, 102, 60],
-      [700, 156, 126, 76],
-      [1200, 174, 148, 96],
-      [1900, 194, 172, 128],
-      [2700, 210, 192, 158],
-      [3500, 224, 212, 190],
+      [0, 99, 91, 81],
+      [100, 114, 105, 93],
+      [300, 128, 118, 105],
+      [700, 142, 131, 117],
+      [1200, 155, 144, 129],
+      [1900, 173, 163, 150],
+      [2700, 195, 188, 177],
+      [3500, 217, 213, 206],
     ],
-    deep: [8, 16, 22],
-    shelf: [28, 50, 52],
-    vegetation: 0.08,
-    plant: [78, 82, 38],
-    snowLine: 3300,
-    rock: [176, 158, 130],
+    deep: [10, 23, 36],
+    shelf: [38, 72, 78],
+    vegetation: 0.04,
+    plant: [96, 104, 88],
+    snowLine: 3400,
+    rock: [170, 156, 142],
   },
   alpine: {
     ramp: [
-      [0, 26, 42, 38],
-      [90, 34, 52, 46],
-      [260, 48, 66, 56],
-      [650, 76, 90, 76],
-      [1200, 108, 116, 100],
-      [1900, 144, 150, 138],
-      [2600, 178, 184, 184],
-      [3400, 218, 222, 226],
+      [0, 60, 76, 79],
+      [90, 68, 84, 86],
+      [260, 80, 96, 98],
+      [650, 96, 111, 113],
+      [1200, 116, 130, 132],
+      [1900, 143, 155, 157],
+      [2600, 181, 191, 193],
+      [3400, 228, 234, 236],
     ],
-    deep: [3, 12, 22],
-    shelf: [16, 42, 58],
-    vegetation: 0.12,
-    plant: [32, 62, 46],
+    deep: [6, 18, 31],
+    shelf: [20, 54, 68],
+    vegetation: 0.05,
+    plant: [72, 96, 91],
     snowLine: 2100,
-    rock: [166, 170, 176],
+    rock: [148, 158, 162],
   },
   tropical: {
     ramp: [
-      [0, 38, 74, 48],
-      [90, 44, 86, 52],
-      [280, 54, 102, 58],
-      [700, 64, 108, 54],
-      [1200, 90, 124, 64],
-      [1900, 118, 136, 76],
-      [2700, 156, 160, 104],
-      [3500, 196, 192, 150],
+      [0, 56, 92, 77],
+      [90, 62, 101, 84],
+      [280, 70, 111, 91],
+      [700, 82, 121, 99],
+      [1200, 98, 134, 112],
+      [1900, 120, 151, 131],
+      [2700, 151, 174, 160],
+      [3500, 194, 207, 198],
     ],
-    deep: [3, 20, 33],
-    shelf: [12, 72, 82],
-    vegetation: 0.42,
-    plant: [16, 92, 36],
+    deep: [6, 28, 43],
+    shelf: [18, 88, 96],
+    vegetation: 0.18,
+    plant: [44, 116, 88],
     snowLine: 4200,
-    rock: [150, 146, 126],
+    rock: [136, 148, 136],
   },
   boreal: {
     ramp: [
-      [0, 24, 40, 38],
-      [90, 30, 52, 46],
-      [280, 42, 68, 56],
-      [700, 62, 88, 68],
-      [1200, 88, 106, 84],
-      [1900, 122, 132, 112],
-      [2700, 158, 162, 148],
-      [3500, 196, 198, 194],
+      [0, 50, 67, 69],
+      [90, 57, 76, 78],
+      [280, 66, 87, 89],
+      [700, 78, 99, 101],
+      [1200, 94, 114, 116],
+      [1900, 119, 137, 139],
+      [2700, 151, 166, 168],
+      [3500, 200, 210, 211],
     ],
-    deep: [4, 14, 26],
-    shelf: [14, 46, 60],
-    vegetation: 0.28,
-    plant: [26, 64, 44],
+    deep: [6, 20, 33],
+    shelf: [18, 52, 66],
+    vegetation: 0.12,
+    plant: [56, 88, 80],
     snowLine: 1900,
-    rock: [150, 156, 152],
+    rock: [144, 156, 158],
   },
   wetland: {
     ramp: [
-      [0, 46, 70, 54],
-      [80, 52, 78, 58],
-      [240, 62, 92, 62],
-      [600, 80, 110, 70],
-      [1100, 104, 126, 80],
-      [1700, 122, 138, 94],
-      [2400, 154, 160, 122],
-      [3200, 190, 194, 164],
+      [0, 64, 90, 84],
+      [80, 70, 98, 91],
+      [240, 78, 107, 98],
+      [600, 88, 118, 108],
+      [1100, 102, 131, 121],
+      [1700, 120, 146, 136],
+      [2400, 148, 168, 158],
+      [3200, 186, 200, 192],
     ],
-    deep: [5, 18, 28],
-    shelf: [12, 56, 66],
-    vegetation: 0.34,
-    plant: [22, 74, 38],
+    deep: [7, 23, 35],
+    shelf: [22, 70, 80],
+    vegetation: 0.16,
+    plant: [54, 102, 90],
     snowLine: 3200,
-    rock: [148, 154, 142],
+    rock: [136, 150, 144],
   },
 };
 
@@ -636,51 +641,41 @@ function buildTerrainCanvas(
         const h = grid.sample(fields.height, xKm, yKm);
         const sx = grid.sample(fields.slopeX, xKm, yKm);
         const sy = grid.sample(fields.slopeY, xKm, yKm);
-        // 西北向斜射光。低丘坡度只有 0.005 左右，真实光照几乎看不出来，
-        // 这里对坡度做夸张，并叠加多尺度地貌斑驳，让丘陵、盆地边缘和山脊可读。
-        const macro = (fbm(xKm / 54, yKm / 54, (seed | 0) + 211) - 0.5) * 0.12;
+        // 柔和的大尺度明暗 + 很低的颗粒，保留地形起伏但去掉旧纸图的斑驳感。
+        const macro = (fbm(xKm / 54, yKm / 54, (seed | 0) + 211) - 0.5) * 0.045;
         const steep = clamp((Math.hypot(sx, sy) - 0.004) / 0.03, 0, 1);
-        const light = Math.tanh(sx * 120 + sy * 80) * (0.5 - steep * 0.28);
-        const shade = clamp(1.02 - light + macro, 0.52, 1.2);
-        const grain = (hash2(px, py, seed | 0) - 0.5) * 0.035;
+        const light = Math.tanh(sx * 100 + sy * 70) * (0.34 - steep * 0.18);
+        const shade = clamp(1.0 - light + macro, 0.74, 1.1);
+        const grain = (hash2(px, py, seed | 0) - 0.5) * 0.012;
         const mottle =
-          (fbm(xKm / 92, yKm / 92, seed | 0) - 0.5) * 0.15 +
-          (fbm(xKm / 31, yKm / 31, (seed | 0) + 61) - 0.5) * 0.075 +
-          (fbm(xKm / 12, yKm / 12, (seed | 0) + 97) - 0.5) * 0.03;
+          (fbm(xKm / 92, yKm / 92, seed | 0) - 0.5) * 0.05 +
+          (fbm(xKm / 31, yKm / 31, (seed | 0) + 61) - 0.5) * 0.02 +
+          (fbm(xKm / 12, yKm / 12, (seed | 0) + 97) - 0.5) * 0.006;
         const base = ramp(palette.ramp, h);
         const tone = shade + grain + mottle;
-        // 低地植被：不同气候区分别压出深绿、黄褐、青灰的底色。
+        // 低地植被：只做很轻的冷绿偏移，避免整块底图变成橄榄绿。
         const veg =
           palette.vegetation *
-          clamp(1 - h / 1400, 0, 1) *
-          clamp((fbm(xKm / 24, yKm / 24, (seed | 0) + 131) - 0.38) * 1.8, 0, 1);
+          clamp(1 - h / 1600, 0, 1) *
+          clamp((fbm(xKm / 36, yKm / 36, (seed | 0) + 131) - 0.42) * 1.5, 0, 1);
         data[p] = clamp(base[0] * tone + (palette.plant[0] - base[0]) * veg, 0, 255);
         data[p + 1] = clamp(base[1] * tone + (palette.plant[1] - base[1]) * veg, 0, 255);
         data[p + 2] = clamp(base[2] * tone + (palette.plant[2] - base[2]) * veg, 0, 255);
-        // 低地森林斑块：让平原不是一整块均匀绿色。
+        // 低地森林：更克制、更偏冷绿，保持现代底图的干净感。
         const forest =
-          clamp((fbm(xKm / 13, yKm / 13, (seed | 0) + 171) - 0.48) * 3.2, 0, 1) *
-          clamp(1 - h / 900, 0, 1) *
-          0.5;
+          clamp((fbm(xKm / 22, yKm / 22, (seed | 0) + 171) - 0.5) * 2.4, 0, 1) *
+          clamp(1 - h / 1100, 0, 1) *
+          0.18;
         if (forest > 0) {
-          data[p] = clamp(data[p] + (16 - data[p]) * forest, 0, 255);
-          data[p + 1] = clamp(data[p + 1] + (44 - data[p + 1]) * forest, 0, 255);
-          data[p + 2] = clamp(data[p + 2] + (26 - data[p + 2]) * forest, 0, 255);
+          data[p] = clamp(data[p] + (36 - data[p]) * forest, 0, 255);
+          data[p + 1] = clamp(data[p + 1] + (64 - data[p + 1]) * forest, 0, 255);
+          data[p + 2] = clamp(data[p + 2] + (58 - data[p + 2]) * forest, 0, 255);
         }
-        // 平原农区：低矮的田块纹理，让底图有“被经营过”的地理感。
-        const flat = clamp(1 - h / 320, 0, 1);
-        if (flat > 0.15 && h < 320) {
-          const plot = hash2(Math.floor(xKm / 26), Math.floor(yKm / 19), (seed | 0) + 303) - 0.5;
-          const field = flat * 0.22;
-          data[p] = clamp(data[p] + plot * 24 * field, 0, 255);
-          data[p + 1] = clamp(data[p + 1] + plot * 18 * field, 0, 255);
-          data[p + 2] = clamp(data[p + 2] + plot * 7 * field, 0, 255);
-        }
-        // 高地加一点冷灰岩色，低地保留暖绿；让高原、山地与平原分层更清楚。
-        const rocky = clamp((h - 1100) / 1500, 0, 1) * 0.22;
-        data[p] = clamp(data[p] + rocky * 18, 0, 255);
-        data[p + 1] = clamp(data[p + 1] + rocky * 16, 0, 255);
-        data[p + 2] = clamp(data[p + 2] + rocky * 20, 0, 255);
+        // 高地加冷灰岩色，低地保留冷绿；让山地与平原分层更清楚但不发黄。
+        const rocky = clamp((h - 1100) / 1500, 0, 1) * 0.18;
+        data[p] = clamp(data[p] + rocky * 12, 0, 255);
+        data[p + 1] = clamp(data[p + 1] + rocky * 14, 0, 255);
+        data[p + 2] = clamp(data[p + 2] + rocky * 18, 0, 255);
         const cliff = clamp((steep - 0.15) / 0.85, 0, 1) * 0.42;
         if (cliff > 0) {
           data[p] = clamp(data[p] + (palette.rock[0] - data[p]) * cliff, 0, 255);
@@ -701,7 +696,7 @@ function buildTerrainCanvas(
         data[p] = palette.deep[0] + (palette.shelf[0] - palette.deep[0]) * k;
         data[p + 1] = palette.deep[1] + (palette.shelf[1] - palette.deep[1]) * k;
         data[p + 2] = palette.deep[2] + (palette.shelf[2] - palette.deep[2]) * k;
-        const grain = (hash2(px, py, seed | 0) - 0.5) * 2.2;
+        const grain = (hash2(px, py, seed | 0) - 0.5) * 1.1;
         data[p] += grain;
         data[p + 1] += grain;
         data[p + 2] += grain;
@@ -743,20 +738,20 @@ function drawLandformTint(ctx: CanvasRenderingContext2D, scene: SceneDef, res: n
     const floor0 = clamp(0.5 - floor, 0.01, 0.98);
     const floor1 = clamp(0.5 + floor, 0.01, 0.98);
     const edge1 = clamp(0.5 + floor + wall, 0.01, 0.98);
-    ramp.addColorStop(0, 'rgba(14,20,16,0.16)');
-    ramp.addColorStop(edge, 'rgba(18,24,18,0.14)');
-    ramp.addColorStop(floor0, 'rgba(176,188,132,0.07)');
-    ramp.addColorStop(floor1, 'rgba(176,188,132,0.07)');
-    ramp.addColorStop(edge1, 'rgba(18,24,18,0.14)');
-    ramp.addColorStop(1, 'rgba(14,20,16,0.16)');
+    ramp.addColorStop(0, 'rgba(8,18,24,0.2)');
+    ramp.addColorStop(edge, 'rgba(10,22,27,0.16)');
+    ramp.addColorStop(floor0, 'rgba(196,220,213,0.045)');
+    ramp.addColorStop(floor1, 'rgba(196,220,213,0.045)');
+    ramp.addColorStop(edge1, 'rgba(10,22,27,0.16)');
+    ramp.addColorStop(1, 'rgba(8,18,24,0.2)');
     ctx.fillStyle = ramp;
     ctx.fillRect(0, 0, res, res);
   } else if (terrain.kind === 'basin') {
     const radius = clamp((terrain.basinRadiusKm ?? domain * 0.3) / domain, 0.12, 0.46) * res;
     const rim = ctx.createRadialGradient(cx, cy, 0, cx, cy, res * 0.62);
-    rim.addColorStop(0, 'rgba(160,172,124,0.04)');
-    rim.addColorStop(clamp(radius / (res * 0.62), 0.1, 0.9), 'rgba(160,172,124,0.03)');
-    rim.addColorStop(1, 'rgba(10,16,14,0.2)');
+    rim.addColorStop(0, 'rgba(188,212,205,0.035)');
+    rim.addColorStop(clamp(radius / (res * 0.62), 0.1, 0.9), 'rgba(188,212,205,0.02)');
+    rim.addColorStop(1, 'rgba(6,15,20,0.22)');
     ctx.fillStyle = rim;
     ctx.fillRect(0, 0, res, res);
   }
@@ -884,8 +879,8 @@ function drawRivers(
     const drawable = path.filter((p) => land(p.u, p.v));
     if (drawable.length < 4) continue;
     const strokes: [string, number][] = [
-      ['rgba(9,28,34,0.52)', 2.0],
-      ['rgba(70,132,146,0.62)', 1.0],
+      ['rgba(5,18,24,0.44)', 2.2],
+      ['rgba(96,172,188,0.6)', 1.0],
     ];
     for (const [color, width] of strokes) {
       ctx.beginPath();
@@ -915,6 +910,10 @@ export class MapView {
   private readonly callbacks: MapCallbacks;
   private terrain: HTMLCanvasElement;
   private readonly terrainContours: Contour[];
+  private readonly ghostCanvas: HTMLCanvasElement;
+  private readonly ghostCtx: CanvasRenderingContext2D;
+  private ghostRaf = 0;
+  private hoverTimer = 0;
 
   private frame: Frame | null = null;
   private history: readonly Frame[] = [];
@@ -950,6 +949,15 @@ export class MapView {
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('画布不可用');
     this.ctx = ctx;
+    // 落点 ghost 单独放一层透明的 canvas：指针移动时只重画这一层，
+    // 不再为每一次 hover 重画整张地形、等压线和站点。
+    this.ghostCanvas = document.createElement('canvas');
+    this.ghostCanvas.className = 'map-ghost-canvas';
+    this.ghostCanvas.setAttribute('aria-hidden', 'true');
+    const ghostCtx = this.ghostCanvas.getContext('2d');
+    if (!ghostCtx) throw new Error('落点图层不可用');
+    this.ghostCtx = ghostCtx;
+    this.canvas.parentElement?.insertBefore(this.ghostCanvas, this.canvas.nextSibling);
     this.scene = scene;
     this.grid = grid;
     this.coastField = smoothCoastField(fields.land, grid.n);
@@ -1000,7 +1008,7 @@ export class MapView {
     this.ghost = ghost;
     if (!ghost) this.ghostPoint = null;
     this.canvas.style.cursor = ghost ? 'crosshair' : this.dragging ? 'grabbing' : 'grab';
-    this.invalidate();
+    this.drawGhostOverlay();
   }
 
   /** 键盘 / 默认落点：没有指针时也能显示 ghost。 */
@@ -1011,7 +1019,7 @@ export class MapView {
           yKm: clamp(point.yKm, 0, this.scene.domainKm),
         }
       : null;
-    if (this.ghost) this.invalidate();
+    this.drawGhostOverlay();
   }
 
   getGhostPoint(): { xKm: number; yKm: number } | null {
@@ -1034,6 +1042,11 @@ export class MapView {
     if (same && !force) return;
     this.canvas.width = Math.round(width * this.dpr);
     this.canvas.height = Math.round(height * this.dpr);
+    this.ghostCanvas.width = this.canvas.width;
+    this.ghostCanvas.height = this.canvas.height;
+    this.ghostCanvas.style.width = `${Math.round(width)}px`;
+    this.ghostCanvas.style.height = `${Math.round(height)}px`;
+    this.ghostCanvas.style.aspectRatio = String(width / Math.max(1, height));
     const designedAspect = this.scene.map?.aspect;
     const cover =
       document.body.classList.contains('v2-focus-map') ||
@@ -1063,6 +1076,9 @@ export class MapView {
 
   destroy(): void {
     if (this.rafId) window.cancelAnimationFrame(this.rafId);
+    if (this.ghostRaf) window.cancelAnimationFrame(this.ghostRaf);
+    if (this.hoverTimer) window.clearTimeout(this.hoverTimer);
+    this.ghostCanvas.remove();
     this.unbind();
   }
 
@@ -1096,9 +1112,8 @@ export class MapView {
     if (this.layers.pressure) this.drawCenters(ctx, frame);
     this.drawStations(ctx, frame);
     this.drawFrame(ctx);
-    this.drawNeatline(ctx, width, height);
-    if (this.ghost && (this.ghostPoint ?? this.pointerKm)) this.drawGhost(ctx);
     ctx.restore();
+    this.drawGhostOverlay();
   }
 
   private drawRaster(ctx: CanvasRenderingContext2D, source: HTMLCanvasElement): void {
@@ -1116,30 +1131,6 @@ export class MapView {
     ctx.restore();
   }
 
-  private drawNeatline(ctx: CanvasRenderingContext2D, width: number, height: number): void {
-    const inset = 7.5;
-    ctx.save();
-    ctx.strokeStyle = 'rgba(148,198,198,0.28)';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(inset, inset, width - inset * 2, height - inset * 2);
-    ctx.strokeStyle = 'rgba(148,198,198,0.42)';
-    const tick = 6;
-    const corners: [number, number, number, number][] = [
-      [inset, inset, 1, 1],
-      [width - inset, inset, -1, 1],
-      [inset, height - inset, 1, -1],
-      [width - inset, height - inset, -1, -1],
-    ];
-    for (const [x, y, dx, dy] of corners) {
-      ctx.beginPath();
-      ctx.moveTo(x + dx * tick, y);
-      ctx.lineTo(x, y);
-      ctx.lineTo(x, y + dy * tick);
-      ctx.stroke();
-    }
-    ctx.restore();
-  }
-
   private drawTerrainContours(ctx: CanvasRenderingContext2D): void {
     if (this.terrainContours.length === 0) return;
     // 河谷靠地貌明暗和轴向注记表达；程序化等高线在长谷里会变成规则波纹，
@@ -1148,14 +1139,14 @@ export class MapView {
     const dx = this.scene.domainKm / this.grid.n;
     const zoom = this.projection.zoom;
     // 全图视角保持轻：等高线只作辅助，不能盖过地貌本身的明暗。
-    const opacity = clamp(0.12 + (zoom - 1) * 0.16, 0.12, 0.38);
+    const opacity = clamp(0.1 + (zoom - 1) * 0.12, 0.1, 0.28);
     ctx.save();
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
     for (const contour of this.terrainContours) {
       const major = contour.value % 500 === 0;
-      ctx.strokeStyle = `rgba(22,44,34,${opacity * (major ? 1.15 : 0.6)})`;
-      ctx.lineWidth = major ? 1.05 : 0.7;
+      ctx.strokeStyle = `rgba(188,210,214,${opacity * (major ? 0.85 : 0.38)})`;
+      ctx.lineWidth = major ? 1 : 0.65;
       ctx.beginPath();
       contour.points.forEach((point, index) => {
         const s = this.projection.toScreen((point.x + 0.5) * dx, (point.y + 0.5) * dx);
@@ -1174,21 +1165,27 @@ export class MapView {
     ctx.save();
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
-    // 先压一圈暗线，再叠亮线：海岸线在浅水和深色陆地上都能读出来。
-    ctx.strokeStyle = 'rgba(4,12,17,0.72)';
-    ctx.lineWidth = 2.6;
-    ctx.beginPath();
-    for (const contour of contours) {
-      contour.points.forEach((point, index) => {
-        const s = this.projection.toScreen((point.x + 0.5) * dx, (point.y + 0.5) * dx);
-        if (index === 0) ctx.moveTo(s.x, s.y);
-        else ctx.lineTo(s.x, s.y);
-      });
-    }
-    ctx.stroke();
-    ctx.strokeStyle = 'rgba(150,202,216,0.66)';
-    ctx.lineWidth = 1.3;
-    ctx.stroke();
+    const trace = (): void => {
+      ctx.beginPath();
+      for (const contour of contours) {
+        contour.points.forEach((point, index) => {
+          const s = this.projection.toScreen((point.x + 0.5) * dx, (point.y + 0.5) * dx);
+          if (index === 0) ctx.moveTo(s.x, s.y);
+          else ctx.lineTo(s.x, s.y);
+        });
+      }
+      ctx.stroke();
+    };
+    // 先压暗、再加一圈很淡的青色岸线光，最后叠亮线；比旧版的黑色粗描边更现代。
+    ctx.strokeStyle = 'rgba(4,12,17,0.62)';
+    ctx.lineWidth = 2.2;
+    trace();
+    ctx.strokeStyle = 'rgba(92,186,206,0.14)';
+    ctx.lineWidth = 5.2;
+    trace();
+    ctx.strokeStyle = 'rgba(168,220,232,0.72)';
+    ctx.lineWidth = 1.1;
+    trace();
     ctx.restore();
   }
 
@@ -1252,20 +1249,20 @@ export class MapView {
       const kind = label.kind ?? 'region';
       const color =
         kind === 'water'
-          ? 'rgba(150,214,226,0.94)'
+          ? 'rgba(136,212,228,0.94)'
           : kind === 'pass'
-            ? 'rgba(244,192,116,0.96)'
+            ? 'rgba(255,191,118,0.96)'
             : kind === 'range'
-              ? 'rgba(228,234,224,0.9)'
-              : 'rgba(214,222,210,0.88)';
+              ? 'rgba(234,241,244,0.9)'
+              : 'rgba(224,233,238,0.86)';
       ctx.font =
         kind === 'range'
-          ? 'italic 12.5px "Noto Serif SC", "Songti SC", serif'
+          ? '600 12px "Noto Sans SC", system-ui, sans-serif'
           : '600 12.5px "Noto Sans SC", system-ui, sans-serif';
       ctx.fillStyle = color;
-      // 先描一圈暗边再填字，避免文字直接落在绿色底图上时发虚。
-      ctx.lineWidth = 3;
-      ctx.strokeStyle = 'rgba(4,11,15,0.62)';
+      // 用窄 halo 代替旧版的粗黑描边，保留可读性但不显得像复古印刷图。
+      ctx.lineWidth = 2.2;
+      ctx.strokeStyle = 'rgba(3,10,15,0.52)';
       ctx.strokeText(label.text, s.x, s.y);
       ctx.fillText(label.text, s.x, s.y);
       if (kind === 'pass') {
@@ -1274,24 +1271,17 @@ export class MapView {
         ctx.lineTo(s.x + 3, s.y + 8);
         ctx.lineTo(s.x, s.y + 12);
         ctx.closePath();
-        ctx.fillStyle = 'rgba(240,186,108,0.55)';
+        ctx.fillStyle = 'rgba(255,186,108,0.55)';
         ctx.fill();
-      } else if (kind === 'range') {
-        ctx.strokeStyle = 'rgba(210,220,208,0.32)';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(s.x - 12, s.y + 8);
-        ctx.lineTo(s.x + 12, s.y + 8);
-        ctx.stroke();
       }
     }
-    // 图幅名放在底部中央，像一张天气图的图名。
+    // 图幅名放在底部中央，改成轻量信息标注，不再做旧式图题。
     if (design.region) {
       ctx.textAlign = 'center';
-      ctx.font = '600 11.5px "JetBrains Mono", "Noto Sans SC", monospace';
-      ctx.fillStyle = 'rgba(208,224,226,0.78)';
-      ctx.lineWidth = 3;
-      ctx.strokeStyle = 'rgba(4,11,15,0.55)';
+      ctx.font = '600 10.5px "Noto Sans SC", system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(206,224,230,0.66)';
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = 'rgba(3,10,15,0.4)';
       ctx.strokeText(design.region, width / 2, height - 12);
       ctx.fillText(design.region, width / 2, height - 12);
     }
@@ -1320,7 +1310,7 @@ export class MapView {
       data[p] = color[0];
       data[p + 1] = color[1];
       data[p + 2] = color[2];
-      data[p + 3] = Math.round((0.05 + 0.07 * clamp((t - 5) / 25, 0, 1)) * 255);
+      data[p + 3] = Math.round((0.025 + 0.055 * clamp((t - 5) / 25, 0, 1)) * 255);
     }
     c.putImageData(image, 0, 0);
     this.drawRaster(ctx, this.tempCanvas);
@@ -1393,7 +1383,7 @@ export class MapView {
         data[p + 3] = 0;
         continue;
       }
-      const alpha = Math.pow(cc, 1.35) * 0.36;
+      const alpha = Math.pow(cc, 1.35) * 0.28;
       const i = k % n;
       const j = (k / n) | 0;
       // 只做显示羽化：场本身不裁，靠近图边时渐隐，避免云区被切出一条直边。
@@ -1746,24 +1736,9 @@ export class MapView {
     const w = b.x - a.x;
     const h = b.y - a.y;
     ctx.save();
-    ctx.strokeStyle = 'rgba(150,186,204,0.2)';
+    ctx.strokeStyle = 'rgba(150,186,204,0.18)';
     ctx.lineWidth = 1;
     ctx.strokeRect(a.x + 0.5, a.y + 0.5, w - 1, h - 1);
-    ctx.strokeStyle = 'rgba(160,198,214,0.5)';
-    const tick = 9;
-    const corners: [number, number, number, number][] = [
-      [a.x, a.y, 1, 1],
-      [b.x, a.y, -1, 1],
-      [a.x, b.y, 1, -1],
-      [b.x, b.y, -1, -1],
-    ];
-    for (const [x, y, sx, sy] of corners) {
-      ctx.beginPath();
-      ctx.moveTo(x + sx * tick, y);
-      ctx.lineTo(x, y);
-      ctx.lineTo(x, y + sy * tick);
-      ctx.stroke();
-    }
 
     // 比例尺
     const scale = this.projection.scale;
@@ -1787,6 +1762,18 @@ export class MapView {
     ctx.textBaseline = 'bottom';
     ctx.fillText(`${km} km`, x0, y0 - 4);
     ctx.restore();
+  }
+
+  private drawGhostOverlay(): void {
+    const g = this.ghostCtx;
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    g.clearRect(0, 0, this.ghostCanvas.width, this.ghostCanvas.height);
+    if (!this.ghost || !(this.ghostPoint ?? this.pointerKm)) return;
+    const width = this.canvas.width / this.dpr;
+    const height = this.canvas.height / this.dpr;
+    g.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    g.clearRect(0, 0, width, height);
+    this.drawGhost(g);
   }
 
   private drawGhost(ctx: CanvasRenderingContext2D): void {
@@ -1914,6 +1901,9 @@ export class MapView {
     this.dragMoved = false;
     this.lastPointer = this.localPoint(event);
     this.canvas.style.cursor = 'grabbing';
+    // 拖动期间不再显示悬浮数据卡，减少遮挡和布局刷新。
+    this.cancelHover();
+    this.callbacks.onHover?.(null);
   };
 
   private onPointerMove = (event: PointerEvent): void => {
@@ -1936,11 +1926,11 @@ export class MapView {
       }
     }
 
-    this.emitHover();
     if (this.ghost) {
       this.ghostPoint = { ...this.pointerKm };
-      this.invalidate();
+      this.scheduleGhost();
     }
+    if (!this.dragging) this.scheduleHover();
   };
 
   private onPointerUp = (event: PointerEvent): void => {
@@ -1949,6 +1939,7 @@ export class MapView {
     this.canvas.style.cursor = this.ghost ? 'crosshair' : 'grab';
     if (this.dragMoved) {
       this.dragMoved = false;
+      this.scheduleHover(0);
       return;
     }
     const world = this.projection.toKm(point.x, point.y);
@@ -1961,14 +1952,17 @@ export class MapView {
       return;
     }
     this.callbacks.onCanvasClick?.(world.xKm, world.yKm);
+    this.scheduleHover(0);
   };
 
   private onPointerLeave = (): void => {
     this.pointerKm = null;
     this.hoverScreen = null;
     this.canvas.style.cursor = this.ghost ? 'crosshair' : 'grab';
+    this.cancelHover();
     this.callbacks.onHover?.(null);
-    this.invalidate();
+    // 已选卡时保留最后落点预览；未选卡时清空幽灵层。
+    this.drawGhostOverlay();
   };
 
   private onWheel = (event: WheelEvent): void => {
@@ -1977,7 +1971,33 @@ export class MapView {
     const factor = event.deltaY > 0 ? 0.88 : 1.12;
     this.projection.zoomAt(point.x, point.y, factor);
     this.invalidate();
+    this.cancelHover();
+    this.callbacks.onHover?.(null);
+    this.scheduleHover(80);
   };
+
+  private cancelHover(): void {
+    if (!this.hoverTimer) return;
+    window.clearTimeout(this.hoverTimer);
+    this.hoverTimer = 0;
+  }
+
+  private scheduleHover(delay = 55): void {
+    if (this.hoverTimer || this.dragging || !this.pointerKm) return;
+    this.hoverTimer = window.setTimeout(() => {
+      this.hoverTimer = 0;
+      if (this.dragging) return;
+      this.emitHover();
+    }, delay);
+  }
+
+  private scheduleGhost(): void {
+    if (this.ghostRaf) return;
+    this.ghostRaf = window.requestAnimationFrame(() => {
+      this.ghostRaf = 0;
+      this.drawGhostOverlay();
+    });
+  }
 
   private onDoubleClick = (): void => {
     this.projection.reset();

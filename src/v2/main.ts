@@ -54,6 +54,18 @@ const placementToast = byId<HTMLDivElement>('placement-toast');
 const deckEmpty = byId<HTMLDivElement>('deck-empty');
 const terrainLegendTitle = byId<HTMLSpanElement>('terrain-legend-title');
 const tempLegendRange = byId<HTMLSpanElement>('temp-legend-range');
+const readoutPos = byId<HTMLElement>('readout-pos');
+const readoutP = byId<HTMLElement>('readout-p');
+const readoutT = byId<HTMLElement>('readout-t');
+const readoutApparent = byId<HTMLElement>('readout-apparent');
+const readoutWind = byId<HTMLElement>('readout-wind');
+const readoutRain = byId<HTMLElement>('readout-rain');
+const readoutCloud = byId<HTMLElement>('readout-cloud');
+const readoutPhase = byId<HTMLElement>('readout-phase');
+const readoutPw = byId<HTMLElement>('readout-pw');
+const readoutAdvection = byId<HTMLElement>('readout-advection');
+const readoutT850 = byId<HTMLElement>('readout-t850');
+const readoutT500 = byId<HTMLElement>('readout-t500');
 
 /** 按设计画幅把画布放进地图舞台，避免 canvas 被舞台高度拉伸或裁切。 */
 function fitMapCanvas(aspect: number): void {
@@ -1242,34 +1254,51 @@ function updateButtons(frame: Frame): void {
   updatePlaybackUi();
 }
 
+let readoutBox: { width: number; height: number } | null = null;
+
 function updateReadout(info: HoverInfo | null): void {
   if (!info) {
     mapReadout.hidden = true;
     return;
   }
   mapReadout.hidden = false;
-  mapReadout.innerHTML = `
-    <b>${info.xKm.toFixed(0)}, ${info.yKm.toFixed(0)} km</b>
-    <span>气压 <em>${info.p.toFixed(0)}</em> hPa</span>
-    <span>气温 <em>${info.t.toFixed(1)}</em> ℃</span>
-    <span>体感 <em>${info.apparent.toFixed(1)}</em> ℃</span>
-    <span>温度平流 <em>${advectionLabel(info.tempAdvectionKPerH)}</em></span>
-    <span>风 <em>${info.wind.toFixed(1)}</em> m/s</span>
-    <span>云 <em>${Math.round(info.cc * 100)}</em>%</span>
-    <span>降水 <em>${info.rain.toFixed(1)}</em> mm/h · ${info.phase}</span>
-    <span>PW <em>${info.pwMm.toFixed(0)}</em> mm</span>
-    <span>850 hPa <em>${Number.isFinite(info.t850) ? info.t850.toFixed(1) : '—'}</em> ℃</span>
-    <span>500 hPa <em>${Number.isFinite(info.t500) ? info.t500.toFixed(1) : '—'}</em> ℃</span>
-  `;
+  // 结构只更新文本，不重建 innerHTML；固定宽度也避免每次移动触发回流。
+  readoutPos.textContent = `${info.xKm.toFixed(0)}, ${info.yKm.toFixed(0)} km`;
+  readoutP.textContent = info.p.toFixed(0);
+  readoutT.textContent = info.t.toFixed(1);
+  readoutApparent.textContent = info.apparent.toFixed(1);
+  readoutWind.textContent = info.wind.toFixed(1);
+  readoutRain.textContent = info.rain.toFixed(1);
+  readoutCloud.textContent = Math.round(info.cc * 100).toString();
+  readoutPhase.textContent = info.phase;
+  readoutPw.textContent = info.pwMm.toFixed(0);
+  readoutAdvection.textContent = advectionLabel(info.tempAdvectionKPerH);
+  readoutT850.textContent = Number.isFinite(info.t850) ? info.t850.toFixed(1) : '—';
+  readoutT500.textContent = Number.isFinite(info.t500) ? info.t500.toFixed(1) : '—';
+
+  if (!readoutBox) {
+    readoutBox = {
+      width: mapReadout.offsetWidth || 214,
+      height: mapReadout.offsetHeight || 108,
+    };
+  }
   const stageRect = mapStage.getBoundingClientRect();
-  const width = mapReadout.offsetWidth || 190;
-  const height = mapReadout.offsetHeight || 90;
-  let left = info.screenX + 16;
-  let top = info.screenY + 16;
-  if (left + width > stageRect.width - 8) left = info.screenX - width - 16;
-  if (top + height > stageRect.height - 8) top = info.screenY - height - 16;
-  mapReadout.style.left = `${Math.max(8, left)}px`;
-  mapReadout.style.top = `${Math.max(8, top)}px`;
+  const canvasRect = mapCanvas.getBoundingClientRect();
+  // HoverInfo.screenX/Y 是相对画布的坐标；地图按画幅居中时会存在左右留边，
+  // 这里换算成相对地图舞台的坐标，卡片才不会偏离指针。
+  const pointerX = info.screenX + (canvasRect.left - stageRect.left);
+  const pointerY = info.screenY + (canvasRect.top - stageRect.top);
+  let left = pointerX + 16;
+  let top = pointerY + 16;
+  if (left + readoutBox.width > stageRect.width - 8) {
+    left = pointerX - readoutBox.width - 16;
+  }
+  if (top + readoutBox.height > stageRect.height - 8) {
+    top = pointerY - readoutBox.height - 16;
+  }
+  left = Math.max(8, Math.min(left, stageRect.width - readoutBox.width - 8));
+  top = Math.max(8, Math.min(top, stageRect.height - readoutBox.height - 8));
+  mapReadout.style.transform = `translate3d(${Math.round(left)}px, ${Math.round(top)}px, 0)`;
 }
 
 // ── 弹层 ───────────────────────────────────────────────────────────────────
