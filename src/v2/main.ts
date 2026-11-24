@@ -50,6 +50,8 @@ const mapStage = byId<HTMLDivElement>('map-stage');
 const mapScaleBar = byId<HTMLElement>('map-scale-bar');
 const mapScaleLabel = byId<HTMLElement>('map-scale-label');
 const mapRegionLabel = byId<HTMLElement>('map-region-label');
+const mapFooter = byId<HTMLDivElement>('map-footer');
+const legendToggle = byId<HTMLButtonElement>('btn-legend-toggle');
 const mapReadout = byId<HTMLDivElement>('map-readout');
 const mapTag = byId<HTMLDivElement>('map-tag');
 const historyChip = byId<HTMLDivElement>('history-chip');
@@ -379,9 +381,17 @@ function syncModalBody(): void {
 
 // ── 关卡生命周期 ───────────────────────────────────────────────────────────
 
+function setLegendExpanded(expanded: boolean): void {
+  mapFooter.classList.toggle('is-expanded', expanded);
+  legendToggle.setAttribute('aria-expanded', String(expanded));
+  legendToggle.textContent = expanded ? '收起' : '图例';
+  legendToggle.title = expanded ? '收起完整图例' : '展开完整图例';
+}
+
 function startLevel(index: number): void {
   animToken += 1;
   stopPlayback();
+  setLegendExpanded(false);
   levelIndex = Math.max(0, Math.min(VOLUME1.length - 1, index));
   level = VOLUME1[levelIndex];
   if (sim) sim.destroy();
@@ -1405,6 +1415,9 @@ function bindEvents(): void {
   byId<HTMLButtonElement>('btn-open-levels').addEventListener('click', openDrawer);
   byId<HTMLButtonElement>('btn-open-help').addEventListener('click', openHelp);
   byId<HTMLButtonElement>('btn-reset-view').addEventListener('click', () => map?.resetView());
+  legendToggle.addEventListener('click', () => {
+    setLegendExpanded(!mapFooter.classList.contains('is-expanded'));
+  });
 
   const focusMapButton = byId<HTMLButtonElement>('btn-focus-map');
   focusMapButton.addEventListener('click', () => {

@@ -149,25 +149,26 @@
             </div>
           </div>
 
-          <div class="map-footer">
+          <div class="map-footer" id="map-footer">
             <div class="map-legend">
-              <div class="legend-group">
+              <div class="legend-group legend-group-terrain">
                 <span class="legend-group-label" id="terrain-legend-title">高程</span>
                 <span class="terrain-ramp"></span>
                 <span class="legend-ticks"><i>0</i><i>500</i><i>1500</i><i>2500m</i></span>
+                <span class="legend-range">0–2500m</span>
               </div>
-              <div class="legend-group">
+              <div class="legend-group legend-group-temp">
                 <span class="legend-group-label">气温</span>
                 <span class="temp-ramp"></span>
                 <span id="temp-legend-range" class="legend-readout">—</span>
               </div>
               <div class="legend-group legend-group-phase">
                 <span class="legend-group-label">相态</span>
-                <span class="phase-key"><i class="phase-dot phase-rain"></i>雨</span>
-                <span class="phase-key"><i class="phase-dot phase-sleet"></i>雨夹雪</span>
-                <span class="phase-key"><i class="phase-dot phase-snow"></i>雪</span>
-                <span class="phase-key"><i class="phase-dot phase-freezing"></i>冻雨</span>
-                <span class="phase-key"><i class="phase-dot phase-hail"></i>冰雹</span>
+                <span class="phase-key" title="雨"><i class="phase-dot phase-rain"></i><span class="phase-label">雨</span></span>
+                <span class="phase-key" title="雨夹雪"><i class="phase-dot phase-sleet"></i><span class="phase-label">雨夹雪</span></span>
+                <span class="phase-key" title="雪"><i class="phase-dot phase-snow"></i><span class="phase-label">雪</span></span>
+                <span class="phase-key" title="冻雨"><i class="phase-dot phase-freezing"></i><span class="phase-label">冻雨</span></span>
+                <span class="phase-key" title="冰雹"><i class="phase-dot phase-hail"></i><span class="phase-label">冰雹</span></span>
               </div>
               <div class="legend-group legend-group-region">
                 <span class="legend-group-label">图幅</span>
@@ -182,6 +183,7 @@
             <div class="map-hint">
               <span>滚轮缩放</span><span>拖动平移</span><span>双击复位</span>
             </div>
+            <button id="btn-legend-toggle" class="legend-toggle" type="button" aria-expanded="false" title="展开完整图例">图例</button>
           </div>
 
           <div class="timeline-wrap">
