@@ -64,6 +64,7 @@ export interface HoverInfo {
 export interface MapCallbacks {
   onCanvasClick?: (xKm: number, yKm: number) => void;
   onHover?: (info: HoverInfo | null) => void;
+  onScaleChange?: (km: number, px: number) => void;
 }
 
 type RGB = [number, number, number];
@@ -552,10 +553,8 @@ class Projection {
     const mapPx = this.domainKm * this.scale;
     const halfExtraX = Math.max(0, (mapPx - this.width) / 2);
     const halfExtraY = Math.max(0, (mapPx - this.height) / 2);
-    const capX = halfExtraX + 80;
-    const capY = halfExtraY + 80;
-    this.panX = clamp(this.panX, -capX, capX);
-    this.panY = clamp(this.panY, -capY, capY);
+    this.panX = clamp(this.panX, -halfExtraX, halfExtraX);
+    this.panY = clamp(this.panY, -halfExtraY, halfExtraY);
   }
 }
 
@@ -1032,6 +1031,26 @@ export class MapView {
     this.invalidate();
   }
 
+  /** 把当前缩放比例换算成页脚比例尺；地图画布内不再绘制 km 比例尺。 */
+  private emitScale(): void {
+    const callback = this.callbacks.onScaleChange;
+    if (!callback) return;
+    const perKm = this.projection.scale;
+    if (!Number.isFinite(perKm) || perKm <= 0) return;
+    const steps = [5, 10, 20, 25, 50, 100, 200, 300, 500, 1000, 2000];
+    let km = steps[0];
+    let best = Number.POSITIVE_INFINITY;
+    for (const step of steps) {
+      const width = step * perKm;
+      const diff = Math.abs(width - 60);
+      if (diff < best) {
+        best = diff;
+        km = step;
+      }
+    }
+    callback(km, km * perKm);
+  }
+
   resize(force = false): void {
     const rect = this.canvas.getBoundingClientRect();
     this.dpr = Math.min(2, window.devicePixelRatio || 1);
@@ -1056,12 +1075,14 @@ export class MapView {
         (document.body.classList.contains('v2-focus-map') ||
           (typeof designedAspect === 'number' && Math.abs(designedAspect - 1) > 0.02)));
     this.projection.fit(width, height, cover);
+    this.emitScale();
     if (this.frame) this.draw();
     else this.invalidate();
   }
 
   resetView(): void {
     this.projection.reset();
+    this.emitScale();
     this.invalidate();
   }
 
@@ -1278,16 +1299,6 @@ export class MapView {
         ctx.fillStyle = 'rgba(255,186,108,0.55)';
         ctx.fill();
       }
-    }
-    // 图幅名放在底部中央，改成轻量信息标注，不再做旧式图题。
-    if (design.region) {
-      ctx.textAlign = 'center';
-      ctx.font = '600 10.5px "Noto Sans SC", system-ui, sans-serif';
-      ctx.fillStyle = 'rgba(206,224,230,0.66)';
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = 'rgba(3,10,15,0.4)';
-      ctx.strokeText(design.region, width / 2, height - 12);
-      ctx.fillText(design.region, width / 2, height - 12);
     }
     ctx.restore();
   }
@@ -1743,28 +1754,6 @@ export class MapView {
     ctx.strokeStyle = 'rgba(150,186,204,0.18)';
     ctx.lineWidth = 1;
     ctx.strokeRect(a.x + 0.5, a.y + 0.5, w - 1, h - 1);
-
-    // 比例尺
-    const scale = this.projection.scale;
-    const km = scale > 1.15 ? 100 : 200;
-    const px = km * scale;
-    const x0 = a.x + 16;
-    const y0 = b.y - 18;
-    ctx.strokeStyle = 'rgba(206,226,236,0.62)';
-    ctx.lineWidth = 1.2;
-    ctx.beginPath();
-    ctx.moveTo(x0, y0);
-    ctx.lineTo(x0 + px, y0);
-    ctx.moveTo(x0, y0 - 3);
-    ctx.lineTo(x0, y0 + 3);
-    ctx.moveTo(x0 + px, y0 - 3);
-    ctx.lineTo(x0 + px, y0 + 3);
-    ctx.stroke();
-    ctx.fillStyle = 'rgba(204,222,230,0.8)';
-    ctx.font = '10px "JetBrains Mono", monospace';
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'bottom';
-    ctx.fillText(`${km} km`, x0, y0 - 4);
     ctx.restore();
   }
 
@@ -1974,6 +1963,7 @@ export class MapView {
     const point = this.localPoint(event);
     const factor = event.deltaY > 0 ? 0.88 : 1.12;
     this.projection.zoomAt(point.x, point.y, factor);
+    this.emitScale();
     this.invalidate();
     this.cancelHover();
     this.callbacks.onHover?.(null);

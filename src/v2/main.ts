@@ -47,6 +47,9 @@ function byId<T extends HTMLElement>(id: string): T {
 
 const mapCanvas = byId<HTMLCanvasElement>('map-canvas');
 const mapStage = byId<HTMLDivElement>('map-stage');
+const mapScaleBar = byId<HTMLElement>('map-scale-bar');
+const mapScaleLabel = byId<HTMLElement>('map-scale-label');
+const mapRegionLabel = byId<HTMLElement>('map-region-label');
 const mapReadout = byId<HTMLDivElement>('map-readout');
 const mapTag = byId<HTMLDivElement>('map-tag');
 const historyChip = byId<HTMLDivElement>('history-chip');
@@ -101,6 +104,11 @@ function fitMapCanvas(aspect: number): void {
   mapCanvas.style.height = `${Math.max(1, Math.round(height))}px`;
   mapCanvas.style.aspectRatio = `${Math.max(1, Math.round(width))} / ${Math.max(1, Math.round(height))}`;
   mapCanvas.dataset.mapFit = 'contain';
+}
+
+function renderMapScale(km: number, _px: number): void {
+  mapScaleBar.title = `比例尺 ${km} km`;
+  mapScaleLabel.textContent = `${km} km`;
 }
 
 const levelTitleEl = byId<HTMLHeadingElement>('level-title');
@@ -420,10 +428,13 @@ function startLevel(index: number): void {
   if (map) map.destroy();
   const mapAspect = level.scene.map?.aspect ?? 1;
   currentMapAspect = mapAspect;
+  mapRegionLabel.textContent = level.scene.map?.region ?? '—';
+  mapRegionLabel.title = level.scene.map?.region ?? '';
   fitMapCanvas(mapAspect);
   map = new MapView(mapCanvas, level.scene, sim.grid, sim.fields, {
     onCanvasClick: onCanvasClick,
     onHover: onHover,
+    onScaleChange: renderMapScale,
   });
   map.setHistory(frames);
   map.setLayers(layers);

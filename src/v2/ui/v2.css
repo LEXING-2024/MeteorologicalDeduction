@@ -1072,6 +1072,18 @@ body.v2-focus-map .v2-map .map-stage {
   white-space: nowrap;
 }
 
+.map-scale-bar {
+  display: inline-block;
+  flex: 0 0 auto;
+  width: 60px;
+  min-width: 24px;
+  height: 7px;
+  border-right: 1px solid rgba(170, 199, 213, 0.52);
+  border-bottom: 1px solid rgba(170, 199, 213, 0.52);
+  border-left: 1px solid rgba(170, 199, 213, 0.52);
+  vertical-align: middle;
+}
+
 .terrain-ramp {
   width: 82px;
   height: 6px;
