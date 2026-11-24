@@ -71,39 +71,16 @@ const readoutT850 = byId<HTMLElement>('readout-t850');
 const readoutT500 = byId<HTMLElement>('readout-t500');
 
 /**
- * 地图画布优先铺满舞台；画幅用于窄屏舞台高度和极端宽高比兜底。
- * 宽高比差得太多时退回设计画幅，避免为了铺满把地图边缘的站点和注记裁掉。
+ * 地图始终铺满舞台，不再按宽高比退回设计画幅、在四周留黑边。
+ * 画幅只用于窄屏下给舞台定高；画布本身由 CSS 撑满舞台。
  */
 function fitMapCanvas(aspect: number): void {
   const safeAspect = Number.isFinite(aspect) && aspect > 0.2 ? aspect : 1;
   mapStage.style.setProperty('--map-aspect', String(safeAspect));
-  const rect = mapStage.getBoundingClientRect();
-  const stageW = Math.max(1, Math.round(rect.width));
-  const stageH = Math.max(1, Math.round(rect.height));
-  if (stageW < 10 || stageH < 10) return;
-  const stageAspect = stageW / stageH;
-  // 专注地图始终铺满；普通布局在 0.8–1.5 之间铺满，超出后按设计画幅 contain，
-  // 保证方形地图在超宽/超窄窗口里仍能看到上下边缘的注记。
-  const fill =
-    document.body.classList.contains('v2-focus-map') ||
-    (stageAspect >= 0.8 && stageAspect <= 1.5);
-  if (fill) {
-    mapCanvas.style.width = `${stageW}px`;
-    mapCanvas.style.height = `${stageH}px`;
-    mapCanvas.style.aspectRatio = `${stageW} / ${stageH}`;
-    mapCanvas.dataset.mapFit = 'cover';
-    return;
-  }
-  let width = stageW;
-  let height = width / safeAspect;
-  if (height > stageH) {
-    height = stageH;
-    width = height * safeAspect;
-  }
-  mapCanvas.style.width = `${Math.max(1, Math.round(width))}px`;
-  mapCanvas.style.height = `${Math.max(1, Math.round(height))}px`;
-  mapCanvas.style.aspectRatio = `${Math.max(1, Math.round(width))} / ${Math.max(1, Math.round(height))}`;
-  mapCanvas.dataset.mapFit = 'contain';
+  mapCanvas.style.removeProperty('width');
+  mapCanvas.style.removeProperty('height');
+  mapCanvas.style.removeProperty('aspect-ratio');
+  mapCanvas.dataset.mapFit = 'cover';
 }
 
 function renderMapScale(km: number, _px: number): void {
