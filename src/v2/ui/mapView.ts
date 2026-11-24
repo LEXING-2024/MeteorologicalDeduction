@@ -486,10 +486,11 @@ class Projection {
   fit(width: number, height: number, cover = false): void {
     this.width = Math.max(1, width);
     this.height = Math.max(1, height);
-    // 普通模式完整容纳整张图；专注模式按长边铺满，短边自然裁切，
-    // 避免宽屏下地图缩在中间、两侧留出大片黑边。
+    // 普通模式完整容纳整张图并留一点边；铺满模式让地图真正顶到容器边缘，
+    // 避免画布外面已经自适应了、里面还留一圈深色窄边。
     const basis = cover ? Math.max(this.width, this.height) : Math.min(this.width, this.height);
-    this.baseScale = (basis * 0.96) / this.domainKm;
+    const fitRatio = cover ? 1 : 0.96;
+    this.baseScale = (basis * fitRatio) / this.domainKm;
     this.reset();
   }
 
@@ -1048,9 +1049,12 @@ export class MapView {
     this.ghostCanvas.style.height = `${Math.round(height)}px`;
     this.ghostCanvas.style.aspectRatio = String(width / Math.max(1, height));
     const designedAspect = this.scene.map?.aspect;
+    const fitMode = this.canvas.dataset.mapFit;
     const cover =
-      document.body.classList.contains('v2-focus-map') ||
-      (typeof designedAspect === 'number' && Math.abs(designedAspect - 1) > 0.02);
+      fitMode === 'cover' ||
+      (fitMode !== 'contain' &&
+        (document.body.classList.contains('v2-focus-map') ||
+          (typeof designedAspect === 'number' && Math.abs(designedAspect - 1) > 0.02)));
     this.projection.fit(width, height, cover);
     if (this.frame) this.draw();
     else this.invalidate();

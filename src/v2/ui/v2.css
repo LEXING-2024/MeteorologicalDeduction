@@ -112,7 +112,7 @@ ul {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  min-height: 620px;
+  min-height: 0;
 }
 
 /* ── 顶栏 ───────────────────────────────────────────────────────────────── */
@@ -859,6 +859,7 @@ body.v2-focus-map .v2-map .map-stage {
 }
 
 .map-stage {
+  --map-aspect: 4 / 3;
   position: relative;
   flex: 1 1 auto;
   min-height: 0;
@@ -2295,7 +2296,7 @@ kbd {
   }
 
   .map-stage {
-    aspect-ratio: 1 / 1;
+    aspect-ratio: var(--map-aspect, 4 / 3);
     flex: 0 0 auto;
   }
 

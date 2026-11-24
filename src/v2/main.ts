@@ -67,21 +67,40 @@ const readoutAdvection = byId<HTMLElement>('readout-advection');
 const readoutT850 = byId<HTMLElement>('readout-t850');
 const readoutT500 = byId<HTMLElement>('readout-t500');
 
-/** 按设计画幅把画布放进地图舞台，避免 canvas 被舞台高度拉伸或裁切。 */
+/**
+ * 地图画布优先铺满舞台；画幅用于窄屏舞台高度和极端宽高比兜底。
+ * 宽高比差得太多时退回设计画幅，避免为了铺满把地图边缘的站点和注记裁掉。
+ */
 function fitMapCanvas(aspect: number): void {
+  const safeAspect = Number.isFinite(aspect) && aspect > 0.2 ? aspect : 1;
+  mapStage.style.setProperty('--map-aspect', String(safeAspect));
   const rect = mapStage.getBoundingClientRect();
-  const stageW = Math.floor(rect.width);
-  const stageH = Math.floor(rect.height);
+  const stageW = Math.max(1, Math.round(rect.width));
+  const stageH = Math.max(1, Math.round(rect.height));
   if (stageW < 10 || stageH < 10) return;
+  const stageAspect = stageW / stageH;
+  // 专注地图始终铺满；普通布局在 0.8–1.5 之间铺满，超出后按设计画幅 contain，
+  // 保证方形地图在超宽/超窄窗口里仍能看到上下边缘的注记。
+  const fill =
+    document.body.classList.contains('v2-focus-map') ||
+    (stageAspect >= 0.8 && stageAspect <= 1.5);
+  if (fill) {
+    mapCanvas.style.width = `${stageW}px`;
+    mapCanvas.style.height = `${stageH}px`;
+    mapCanvas.style.aspectRatio = `${stageW} / ${stageH}`;
+    mapCanvas.dataset.mapFit = 'cover';
+    return;
+  }
   let width = stageW;
-  let height = width / aspect;
+  let height = width / safeAspect;
   if (height > stageH) {
     height = stageH;
-    width = height * aspect;
+    width = height * safeAspect;
   }
   mapCanvas.style.width = `${Math.max(1, Math.round(width))}px`;
   mapCanvas.style.height = `${Math.max(1, Math.round(height))}px`;
-  mapCanvas.style.aspectRatio = String(aspect);
+  mapCanvas.style.aspectRatio = `${Math.max(1, Math.round(width))} / ${Math.max(1, Math.round(height))}`;
+  mapCanvas.dataset.mapFit = 'contain';
 }
 
 const levelTitleEl = byId<HTMLHeadingElement>('level-title');
@@ -421,6 +440,11 @@ function startLevel(index: number): void {
   map.resize();
   renderStatic();
   renderFrame();
+  requestAnimationFrame(() => {
+    if (!map) return;
+    fitMapCanvas(currentMapAspect);
+    map.resize(true);
+  });
 }
 
 function advanceRoundInternal(auto: boolean, force = false): void {
@@ -1401,7 +1425,10 @@ function bindEvents(): void {
     focusMapButton.setAttribute('aria-pressed', active ? 'true' : 'false');
     focusMapButton.title = active ? '退出专注地图' : '专注地图';
     // 面板隐藏后画布尺寸变化，等布局稳定再重新 fit，否则投影会落在旧尺寸上。
-    window.requestAnimationFrame(() => map?.resize(true));
+    window.requestAnimationFrame(() => {
+      fitMapCanvas(currentMapAspect);
+      map?.resize(true);
+    });
   });
 
   levelDrawer.querySelectorAll<HTMLElement>('[data-close-drawer]').forEach((element) => {
@@ -1531,15 +1558,32 @@ function bindEvents(): void {
     if (levelIndex < VOLUME1.length - 1) startLevel(levelIndex + 1);
   });
 
-  window.addEventListener('resize', () => {
+  let mapFitRaf = 0;
+  let mapFitTimer = 0;
+  const refitMap = (): void => {
+    if (mapFitRaf) {
+      cancelAnimationFrame(mapFitRaf);
+      mapFitRaf = 0;
+    }
+    if (mapFitTimer) {
+      clearTimeout(mapFitTimer);
+      mapFitTimer = 0;
+    }
     fitMapCanvas(currentMapAspect);
     map?.resize(true);
-  });
+  };
+  const scheduleMapRefit = (): void => {
+    if (mapFitRaf || mapFitTimer) return;
+    mapFitRaf = requestAnimationFrame(refitMap);
+    // 某些嵌入/后台场景 requestAnimationFrame 会被节流，定时器兜底保证仍能重算。
+    mapFitTimer = window.setTimeout(refitMap, 90);
+  };
+
+  window.addEventListener('resize', scheduleMapRefit);
+  window.visualViewport?.addEventListener('resize', scheduleMapRefit);
+  document.addEventListener('fullscreenchange', scheduleMapRefit);
   if ('ResizeObserver' in window) {
-    const observer = new ResizeObserver(() => {
-      fitMapCanvas(currentMapAspect);
-      map?.resize(true);
-    });
+    const observer = new ResizeObserver(scheduleMapRefit);
     observer.observe(mapStage);
   }
 
