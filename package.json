@@ -1,0 +1,51 @@
+{
+  "name": "weather-system",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build",
+    "check": "npm run build && npm run verify:all",
+    "verify": "tsx scripts/verify-levels.ts",
+    "verify:regressions": "tsx scripts/verify-regressions.ts",
+    "verify:scale": "tsx scripts/verify-scale.ts",
+    "verify:all": "npm run verify && npm run verify:water && npm run verify:scale && npm run verify:regressions && npm run verify:fixes && npm run verify:physics && npm run verify:v2",
+    "verify:fixes": "tsx scripts/verify-fixes.ts",
+    "preview": "vite preview --host 127.0.0.1",
+    "verify:solver": "tsx scripts/verify-solver.ts",
+    "verify:solver-physical": "tsx scripts/verify-solver-physical.ts",
+    "verify:physics": "tsx scripts/verify-solver.ts && tsx scripts/verify-solver-physical.ts",
+    "audit:one-card": "tsx scripts/audit-one-card.ts",
+    "audit:min-cards": "tsx scripts/audit-min-cards.ts",
+    "verify:sensitivity": "tsx scripts/verify-sensitivity.ts",
+    "verify:sensitivity:strict": "tsx scripts/verify-sensitivity.ts --strict",
+    "verify:water": "tsx scripts/verify-water.ts",
+    "prognostic:sandbox": "tsx scripts/prognostic-sandbox.ts",
+    "verify:prognostic": "tsx scripts/verify-prognostic.ts",
+    "prognostic:pilot": "tsx scripts/prognostic-pilot-l1.ts",
+    "prognostic:ui": "vite --open /prognostic.html",
+    "prognostic:level": "tsx scripts/prognostic-level-l1.ts",
+    "dev:v2": "vite --host 127.0.0.1 --port 5180 --strictPort",
+    "verify:foundation": "tsx scripts/v2/verify-foundation.ts",
+    "verify:m2": "tsx scripts/v2/verify-m2.ts",
+    "verify:phase-pw": "tsx scripts/v2/verify-phase-pw.ts",
+    "verify:layers": "tsx scripts/v2/verify-layers.ts",
+    "verify:m3": "tsx scripts/v2/verify-m3.ts",
+    "verify:spatial": "tsx scripts/v2/verify-spatial.ts",
+    "verify:cold": "tsx scripts/v2/verify-cold-scene.ts",
+    "verify:recipes": "tsx scripts/v2/verify-recipes.ts",
+    "verify:v2-water": "tsx scripts/v2/verify-water.ts",
+    "verify:v2-local": "tsx scripts/v2/verify-local.ts",
+    "verify:v2": "tsx scripts/v2/verify-foundation.ts && tsx scripts/v2/verify-m2.ts && tsx scripts/v2/verify-phase-pw.ts && tsx scripts/v2/verify-layers.ts && tsx scripts/v2/verify-water.ts && tsx scripts/v2/verify-levels.ts && tsx scripts/v2/verify-local.ts && tsx scripts/v2/verify-m3.ts && tsx scripts/v2/verify-spatial.ts && tsx scripts/v2/verify-cold-scene.ts && tsx scripts/v2/verify-recipes.ts && tsx scripts/v2/verify-physics.ts"
+  },
+  "dependencies": {
+    "phaser": "4.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "tsx": "^4.20.6",
+    "typescript": "5.9.3",
+    "vite": "7.1.12"
+  }
+}

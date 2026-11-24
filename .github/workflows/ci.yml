@@ -1,0 +1,47 @@
+name: CI
+
+# Fails the build on the two things that broke the last refactor:
+# a torn startup contract (tsc) and a regression in levels/physics (verify:all).
+on:
+  push:
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Typecheck + production build
+        run: npm run build
+
+      - name: Level, scale, regression, water and physics verification
+        run: npm run verify:all
+
+      # Guard against re-introducing the abandoned skeleton modules: they must
+      # never reappear under src/ and be imported without implementing them.
+      - name: Reject abandoned skeleton modules under src/
+        run: |
+          if find src -type f \( \
+            -name 'PlacementController.ts' -o \
+            -name 'EntityInspector.ts' -o \
+            -name 'RunOrchestrator.ts' -o \
+            -name 'ProgressStore.ts' -o \
+            -name 'KeyboardRouter.ts' -o \
+            -name 'MapRenderer.ts' -o \
+            -name 'InteractionController.ts' -o \
+            -name 'RunAnimator.ts' -o \
+            -name 'PerformanceOptimizer.ts' -o \
+            -name 'BundleOptimizer.ts' -o \
+            -name 'AccessibilityManager.ts' \
+          \) | grep -q .; then
+            echo "::error::Abandoned refactor skeleton found under src/ — see .workbuddy/backup-20261120/QUARANTINE_NOTICE.md"
+            exit 1
+          fi

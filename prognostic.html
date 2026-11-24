@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>预报内核 · 时间轴沙盒</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #070c12;
+        --panel: rgba(255, 255, 255, 0.03);
+        --line: rgba(255, 255, 255, 0.08);
+        --text: #dce7ee;
+        --muted: #7f95a5;
+        --cyan: #8fd8e5;
+        --amber: #e0a15a;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: radial-gradient(900px 500px at 70% -10%, rgba(74, 109, 132, 0.18), transparent 60%), #070c12;
+        color: var(--text);
+        font-family: 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
+        font-size: 13px;
+      }
+      header {
+        padding: 18px 24px 10px;
+        border-bottom: 1px solid var(--line);
+      }
+      h1 { margin: 0 0 4px; font-size: 16px; font-weight: 600; letter-spacing: 0.02em; }
+      header p { margin: 0; color: var(--muted); font-size: 11.5px; }
+      main {
+        display: grid;
+        grid-template-columns: minmax(320px, 560px) minmax(300px, 1fr);
+        gap: 18px;
+        padding: 18px 24px 28px;
+        align-items: start;
+      }
+      .card {
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--panel);
+        padding: 12px;
+      }
+      canvas { width: 100%; height: auto; display: block; border-radius: 4px; background: #0a1218; }
+      .controls { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+      input[type='range'] { flex: 1; accent-color: var(--cyan); }
+      button {
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--text);
+        padding: 5px 10px;
+        font-size: 12px;
+        cursor: pointer;
+      }
+      button:hover { border-color: rgba(143, 216, 229, 0.5); color: var(--cyan); }
+      button:disabled { opacity: 0.45; cursor: default; }
+      .hour {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+        color: var(--cyan);
+        min-width: 74px;
+        text-align: right;
+      }
+      table { width: 100%; border-collapse: collapse; font-size: 12px; }
+      th, td { padding: 5px 6px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); text-align: right; }
+      th:first-child, td:first-child { text-align: left; }
+      th { color: var(--muted); font-weight: 500; font-size: 10.5px; letter-spacing: 0.04em; }
+      td.mono { font-family: 'JetBrains Mono', monospace; }
+      .legend { display: flex; gap: 12px; color: var(--muted); font-size: 10.5px; margin-top: 8px; }
+      .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+      .status { margin-top: 8px; color: var(--muted); font-size: 11px; min-height: 16px; }
+      .badge {
+        display: inline-block;
+        padding: 1px 6px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        font-size: 10px;
+        color: var(--muted);
+        margin-left: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>预报内核 · 时间轴沙盒 <span class="badge">96² · 1000 km · dt 10 s</span></h1>
+      <p>逐小时状态回放与干预；这是预报内核的开发页，不属于战役关卡。</p>
+    </header>
+    <main>
+      <section class="card">
+        <canvas id="map" width="640" height="640"></canvas>
+        <div class="controls">
+          <button id="play" type="button">播放</button>
+          <input id="scrub" type="range" min="0" max="6" step="1" value="0" aria-label="小时" />
+          <span class="hour" id="hour">0 h</span>
+        </div>
+        <div class="legend">
+          <span><i style="background:#2b6cb0"></i>低压</span>
+          <span><i style="background:#3f8f8a"></i>接近平均</span>
+          <span><i style="background:#c98a4b"></i>高压</span>
+          <span id="mass"></span>
+        </div>
+        <div class="controls">
+          <button id="intervene" type="button">在此时刻注入 +10 hPa 高压</button>
+          <button id="reset" type="button">重跑</button>
+        </div>
+        <div class="status" id="status">初始化…</div>
+      </section>
+      <section class="card">
+        <table>
+          <thead>
+            <tr><th>站点</th><th>P hPa</th><th>T °C</th><th>Q g/m³</th><th>W</th><th>锋面</th><th>风速</th></tr>
+          </thead>
+          <tbody id="stations"></tbody>
+        </table>
+        <div class="status" id="detail"></div>
+      </section>
+    </main>
+    <script type="module" src="/src/dev/prognostic-timeline.ts"></script>
+  </body>
+</html>

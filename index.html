@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0a0f16" />
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <meta
+      name="description"
+      content="气象推演：在连续天气图上放置气压与气团系统（气团卡同时控制冷热与干湿），推演风、垂直运动与降水。"
+    />
+    <title>气象推演 · 连续天气图</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#workspace">跳到工作区</a>
+    <div class="viewport-hint" role="note">
+      这张连续天气图按 1180 px 以上的桌面宽度设计；窗口更窄时可以横向滚动，或放大浏览器窗口获得完整工作面。
+    </div>
+    <div id="home-screen" class="home-screen">
+      <div class="home-contours" aria-hidden="true">
+        <i></i><i></i><i></i><i></i><i></i>
+      </div>
+      <div class="home-content">
+        <div class="home-kicker">连续天气图 · 交互推演</div>
+        <h1>气象推演</h1>
+        <p class="home-subtitle">你只负责气压差，剩下的交给大气。</p>
+        <div class="home-actions">
+          <button id="home-start" class="home-primary" type="button">开始推演</button>
+          <button id="home-continue" class="home-secondary" type="button">继续关卡</button>
+          <button id="home-manual" class="home-secondary" type="button">操作手册</button>
+          <button id="home-settings" class="home-secondary" type="button">设置</button>
+        </div>
+        <div id="home-progress" class="home-progress">已开放 72 关 · 已完成 <b id="home-completed">0</b> / 72</div>
+      </div>
+      <div class="home-corner">连续天气图 · 交互推演</div>
+    </div>
+
+    <div id="settings-panel" class="settings-panel" hidden>
+      <div class="settings-card" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+        <div class="settings-head">
+          <div><span class="panel-section-title">设置</span><h2 id="settings-title">推演设置</h2></div>
+          <button id="settings-close" class="campaign-close" type="button" aria-label="关闭设置">×</button>
+        </div>
+        <div class="settings-row">
+          <span>运行动画</span>
+          <div class="settings-options">
+            <button type="button" data-speed="1">标准</button>
+            <button type="button" data-speed="1.8">快速</button>
+          </div>
+        </div>
+        <div class="settings-row">
+          <span>判据预览</span>
+          <div class="settings-options" id="preview-options">
+            <button type="button" data-preview="qualitative">定性</button>
+            <button type="button" data-preview="exact">精确</button>
+          </div>
+        </div>
+        <div class="settings-row">
+          <span>半球</span>
+          <button id="hemisphere-toggle" class="hemisphere-chip" type="button" title="点击切换南北半球">
+            <b id="hemisphere-lat">28°N</b>
+            <em id="hemisphere-label">北半球</em>
+            <i aria-hidden="true">⇄</i>
+          </button>
+        </div>
+        <div class="settings-row">
+          <span>关卡存档</span>
+          <button id="reset-progress" class="settings-danger" type="button">重置全部进度</button>
+        </div>
+        <p class="settings-note">动画速度只影响诊断视角的播放，不改变计算结果。判据预览“定性”只提示缺失的必要条件，不提前告诉能否通关；“精确”会显示运行前的数值与判定。</p>
+      </div>
+    </div>
+    <div id="app" class="app-shell">
+      <header class="topbar">
+        <button id="brand-home" class="brand" type="button" title="返回首页">
+          <div class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 40 40" fill="none">
+              <circle cx="20" cy="20" r="14.5" stroke="currentColor" stroke-opacity=".35" />
+              <circle cx="20" cy="20" r="8.5" stroke="currentColor" stroke-opacity=".55" />
+              <path d="M20 3.5v7M20 29.5v7M3.5 20h7M29.5 20h7" stroke="currentColor" stroke-opacity=".55" />
+              <path d="M20 20 30.5 12" stroke="currentColor" />
+              <circle cx="20" cy="20" r="2.4" fill="currentColor" />
+            </svg>
+          </div>
+          <strong class="brand-title">气象推演</strong>
+        </button>
+
+        <div class="mission-block">
+          <span class="mission-meta"><b id="header-code">第 01 关</b><i>·</i><span id="header-stage">基础系统</span></span>
+          <h2 id="header-name">低压系统</h2>
+        </div>
+
+        <nav id="level-rail" class="level-rail" aria-label="关卡导航" hidden></nav>
+
+        <div class="top-actions">
+          <button id="home-link" class="nav-button" type="button" title="返回首页">首页</button>
+          <button id="campaign-button" class="nav-button" type="button" title="查看全部关卡">关卡</button>
+          <button id="manual-button" class="nav-button" type="button" title="查看操作手册">手册</button>
+          <button id="undo-button" class="text-button" type="button" title="撤销上一回合" disabled>
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M6 4 2.5 7.5 6 11" />
+              <path d="M2.8 7.5h6.1a4 4 0 0 1 0 8H7" />
+            </svg>
+            <span>撤销</span>
+          </button>
+          <button id="reset-button" class="text-button" type="button" title="重开本关">
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path d="M13 8a5 5 0 1 1-1.5-3.5" />
+              <path d="M13.2 2.9v3.6H9.6" />
+            </svg>
+            <span>重开</span>
+          </button>
+          <button id="run-button" class="run-button" type="button" title="运行推演">
+            <svg class="run-icon" viewBox="0 0 14 16" aria-hidden="true">
+              <path d="M2.5 1.8 12 8l-9.5 6.2V1.8Z" />
+            </svg>
+            <span id="run-label">运行推演</span>
+          </button>
+        </div>
+      </header>
+
+      <main id="workspace" class="workspace" tabindex="-1">
+        <aside class="sidebar deck-panel">
+          <div class="panel-heading">
+            <h2>天气系统</h2>
+          </div>
+          <div id="deck-list" class="deck-list"></div>
+          <div class="deck-footer compact-footer">
+            <p>拖拽卡牌 · 方向键 + Enter 放置 · 右键移除</p>
+            <p id="deck-shaping-hint" class="deck-shaping-hint" hidden>双击实体进入捏形编辑</p>
+          </div>
+        </aside>
+
+        <section class="map-column">
+          <div id="map-frame" class="map-frame">
+            <div class="map-head">
+              <div class="map-head-title">
+                <strong id="map-title">地面天气图</strong>
+                <span id="map-timestamp">第 0 小时 · 2026-06-18 14:00</span>
+              </div>
+              <div class="map-head-tools">
+                <span id="level-mode-badge" class="level-mode-badge" hidden></span>
+                <span id="budget-badge" class="budget-badge" hidden></span>
+                <div id="layer-control" class="layer-control" aria-label="地图层次" hidden>
+                  <button type="button" data-layer="low" title="地面天气图：等压线、风、降水、温度、锋面">地面</button>
+                  <button type="button" data-layer="mid" title="环境层：中层气团与层结，底图为高空等压线与高空风">环境</button>
+                  <button type="button" data-layer="high" title="高空层：槽、脊与急流">高空</button>
+                </div>
+              </div>
+            </div>
+            <div id="map-legend" class="map-legend" aria-label="图例（点击可开关图层）">
+              <button type="button" class="legend-item legend-toggle" data-legend="isobar" data-legend-toggle="isobar" title="点击隐藏/显示等压线" aria-pressed="true"><i class="legend-swatch isobar"></i>等压线</button>
+              <span class="legend-item" data-legend="features"><i class="legend-swatch ridge"></i>槽 / 脊</span>
+              <button type="button" class="legend-item legend-toggle" data-legend="sst" data-legend-toggle="sst" title="点击隐藏/显示海温" aria-pressed="false"><i class="legend-swatch sst"></i>海温</button>
+              <span class="legend-item" data-legend="terrain"><i class="legend-swatch elevation"></i>等高线</span>
+              <span class="legend-item legend-terrain" data-legend="terrain" title="地形高程：0–3000 m"><i class="legend-ramp"></i>地形 <em>0</em><em>1k</em><em>2k</em><em>3k</em></span>
+              <button type="button" class="legend-item legend-toggle" data-legend="temperature" data-legend-toggle="temperature" title="点击隐藏/显示冷暖平流" aria-pressed="true"><i class="legend-swatch temperature"></i>冷暖</button>
+              <button type="button" class="legend-item legend-toggle" data-legend="wind" data-legend-toggle="wind" title="点击隐藏/显示风矢" aria-pressed="true"><i class="legend-swatch wind"></i>风矢（流向）</button>
+              <button type="button" class="legend-item legend-toggle" data-legend="rain" data-legend-toggle="rain" title="点击隐藏/显示降水" aria-pressed="true"><i class="legend-swatch rain"></i>降水</button>
+              <span class="legend-item" data-legend="front"><i class="legend-swatch front"></i>锋面</span>
+            </div>
+            <div id="weather-map" class="weather-map" aria-label="天气图"></div>
+
+            <div id="map-scale" class="map-scale" aria-label="比例尺">
+              <span class="scale-caption">比例尺</span>
+              <div id="scale-bar" class="scale-bar"><i></i><i></i><i></i><i></i></div>
+              <div class="scale-labels"><span>0</span><span id="scale-label">100 km</span></div>
+            </div>
+
+            <div id="placement-tip" class="placement-tip" hidden>
+              <span id="placement-glyph" class="placement-glyph">L</span>
+              <span class="placement-copy">正在放置 <b id="placement-name">低压</b> · <em id="placement-strength">−10 hPa</em></span>
+              <button id="cancel-placement" type="button">取消</button>
+            </div>
+
+            <div id="run-progress" class="run-progress" hidden>
+              <div class="run-phase-index">
+                <span id="run-step">第 1 步 / 共 3 步</span>
+                <strong id="run-phase">风场建立</strong>
+              </div>
+              <div class="run-pips" aria-hidden="true">
+                <i class="active"></i><i></i><i></i>
+              </div>
+              <span id="run-phase-detail" class="run-phase-detail">气压梯度驱动空气</span>
+              <button id="skip-phase" type="button">跳过</button>
+            </div>
+
+            <div id="result-banner" class="result-banner" role="status" aria-live="polite" hidden>
+              <div id="result-mark" class="result-mark">✓</div>
+              <div class="result-copy">
+                <span id="result-kicker">推演完成</span>
+                <strong id="result-title">目标达成</strong>
+                <p id="result-text"></p>
+                <div id="result-stars" class="result-stars" hidden aria-label="本关星级"></div>
+              </div>
+              <div class="result-actions">
+                <button id="result-secondary" class="result-secondary" type="button">继续推演</button>
+                <button id="result-primary" class="result-primary" type="button">进入下一关</button>
+              </div>
+            </div>
+
+            <div id="hover-tooltip" class="hover-tooltip" hidden></div>
+          </div>
+        </section>
+
+        <aside class="sidebar analysis-panel" data-view="goal">
+          <div class="panel-tabs" role="tablist" aria-label="右栏视图">
+            <button id="panel-tab-goal" class="panel-tab active" type="button" role="tab" aria-selected="true" aria-controls="panel-goal" data-panel="goal">推演</button>
+            <button id="panel-tab-station" class="panel-tab" type="button" role="tab" aria-selected="false" aria-controls="panel-station" data-panel="station">站点</button>
+          </div>
+          <section id="panel-goal" class="objective-card" role="tabpanel" aria-labelledby="panel-tab-goal">
+            <div class="panel-kicker">
+              <span>当前目标</span>
+              <span id="objective-code">第 1 关 / 共 72 关</span>
+            </div>
+            <h2 id="objective-title">让 A 城出现上升气流</h2>
+            <p id="objective-detail" class="objective-detail">在 A 城附近建立低压中心。</p>
+            <div id="goal-timeline" class="goal-timeline" hidden>
+              <div class="timeline-head">
+                <span class="timeline-title">回合预览 <em>只读</em></span>
+                <button id="timeline-toggle" class="timeline-toggle" type="button" aria-expanded="false" aria-controls="timeline-track">展开刻度</button>
+              </div>
+              <p id="timeline-summary" class="timeline-summary">单回合目标 · 无需跨回合观察</p>
+              <div id="timeline-track" class="timeline-track" hidden aria-label="回合刻度（只读）"></div>
+            </div>
+            <div class="goal-readout">
+              <div class="goal-readout-head">
+                <span>目标判据</span>
+                <strong id="goal-target">A 城 W &gt; 0.15</strong>
+              </div>
+              <div class="goal-meter"><i id="goal-meter-fill"></i></div>
+              <div class="goal-meta">
+                <span id="goal-state" role="status" aria-live="polite">等待运行</span>
+                <span id="goal-actual" class="mono">--</span>
+              </div>
+              <div class="goal-consistency" id="goal-consistency">
+                <span>物理一致性</span>
+                <b id="goal-consistency-value" data-tone="good">100</b>
+                <i id="goal-consistency-note">符合物理约束</i>
+              </div>
+            </div>
+            <div id="hourly-strip" class="hourly-strip" hidden aria-label="预报逐小时采样">
+              <div class="hourly-head"><span>逐小时预报</span><small id="hourly-note">3 小时积分 · 峰值采样</small></div>
+              <div id="hourly-track" class="hourly-track"></div>
+            </div>
+            <section id="goal-causal-check" class="causal-check" aria-label="因果链" hidden>
+              <div class="causal-check-title">
+                <strong>因果链</strong>
+                <small>源 → 输送 → 上升 → 凝结 · W ≤ 0 → R = 0</small>
+              </div>
+              <div class="causal-check-head">
+                <span id="causal-summary" class="causal-summary"></span>
+                <button id="causal-toggle" class="causal-toggle" type="button" aria-expanded="true" aria-controls="causal-slots">收起</button>
+              </div>
+              <div id="causal-slots" class="causal-slots"></div>
+            </section>
+            <p id="level-brief" class="level-brief"></p>
+            <div id="locked-notice" class="locked-notice" hidden>
+              <svg viewBox="0 0 14 14" aria-hidden="true">
+                <rect x="2.5" y="6" width="9" height="6.5" rx="1" />
+                <path d="M4.5 6V4.4a2.5 2.5 0 0 1 5 0V6" />
+              </svg>
+              <span></span>
+            </div>
+          </section>
+
+          <section id="panel-station" class="station-card" role="tabpanel" aria-labelledby="panel-tab-station">
+            <div class="station-card-head">
+              <span class="panel-section-title">站点实况</span>
+              <span class="live-state"><i></i>实时</span>
+            </div>
+            <div id="station-tabs" class="station-tabs"></div>
+            <div class="station-hero">
+              <div class="station-ident">
+                <span id="station-letter">A</span>
+                <div>
+                  <strong id="station-name">城</strong>
+                </div>
+              </div>
+              <div class="station-air-mass"><span>气团</span><b id="station-air-mass">未定</b></div>
+              <div id="station-weather-icon" class="station-weather-icon"></div>
+              <div class="station-temperature">
+                <strong id="station-temp">22.0</strong><span>°C</span>
+              </div>
+            </div>
+            <div class="metric-grid">
+              <div class="metric-cell">
+                <span>低层气压 <em>P</em></span>
+                <strong id="metric-pressure">1012.0</strong>
+                <small>hPa</small>
+              </div>
+              <div class="metric-cell">
+                <span>水汽供应 <em>Q</em></span>
+                <strong id="metric-moisture">7.4</strong>
+                <small id="metric-moisture-note">g/m³</small>
+              </div>
+              <div class="metric-cell">
+                <span>综合上升 <em>W</em></span>
+                <strong id="metric-vertical">0.00</strong>
+                <small>指数</small>
+              </div>
+              <div class="metric-cell">
+                <span>降水率 <em>R</em></span>
+                <strong id="metric-rain">0.00</strong>
+                <small>mm/3h</small>
+              </div>
+            </div>
+            <div class="upper-air-strip">
+              <div><span>高层 P 距平</span><strong id="metric-high-pressure">+0.0</strong><small>hPa</small></div>
+              <div><span>高层上升</span><strong id="metric-high-vertical">+0.00</strong><small>指数</small></div>
+            </div>
+            <div id="surface-strip" class="surface-strip" hidden aria-label="地表与水量收支">
+              <div><span id="surface-kind">海面</span><strong id="surface-sst">26.5</strong><small>°C 海温</small></div>
+              <div><span>地表粗糙度</span><strong id="surface-roughness">0.0002</strong><small>m</small></div>
+              <div><span>源区蒸发</span><strong id="surface-evap">0.00</strong><small>g/m³·回合</small></div>
+              <div><span>源区水量</span><strong id="surface-water">0.0</strong><small>剩余</small></div>
+              <div><span>纬度</span><strong id="surface-lat">28.0</strong><small>° 绝对纬度</small></div>
+              <div><span>海拔</span><strong id="surface-elev">0</strong><small>m（已计入气温）</small></div>
+            </div>
+            <div class="front-strip">
+              <span>锋面</span>
+              <strong id="station-front">无锋面</strong>
+              <small id="station-front-lift">抬升指数 +0.00</small>
+            </div>
+            <div class="wind-strip">
+              <div class="wind-compass">
+                <span>北</span>
+                <div class="wind-needle" id="wind-needle">
+                  <svg viewBox="0 0 28 28">
+                    <path d="M14 5.5 18 21l-4-3-4 3 4-15.5Z" />
+                  </svg>
+                </div>
+              </div>
+              <div class="wind-copy">
+                <span>近地面风</span>
+                <strong id="station-wind">静风 <em>0.0 m/s</em></strong>
+                <small id="station-beaufort">0 级 · 来向 / 流向</small>
+              </div>
+              <div class="rain-state">
+                <span>24 小时等效</span>
+                <strong id="station-rain-equivalent">0.0 <small>mm</small></strong>
+                <small id="station-rain-grade">无降水</small>
+              </div>
+            </div>
+          </section>
+
+          <section class="hint-card">
+            <div class="hint-head">
+              <span class="panel-section-title">提示</span>
+              <button id="hint-toggle" class="hint-toggle" type="button" aria-expanded="false" aria-controls="level-hint">显示提示</button>
+            </div>
+            <p id="level-hint" hidden></p>
+            <div class="hint-solution-row">
+              <button id="solution-toggle" class="hint-solution" type="button" aria-expanded="false" aria-controls="level-solution">显示解法</button>
+              <small>使用后本关最高 1 星</small>
+            </div>
+            <p id="level-solution" class="solution-text" hidden></p>
+          </section>
+
+
+        </aside>
+      </main>
+
+      <section id="log-drawer" class="log-drawer collapsed">
+        <button id="log-toggle" class="log-head" type="button" aria-expanded="false" aria-controls="log-body">
+          <span class="log-heading">
+            <strong>推演日志</strong>
+          </span>
+          <span id="log-status" class="log-status idle"><i></i>等待推演</span>
+          <span id="log-summary" class="log-summary">放置天气系统后运行推演</span>
+          <span id="log-toggle-copy" class="log-toggle-copy">展开日志</span>
+          <svg class="log-chevron" viewBox="0 0 14 14" aria-hidden="true">
+            <path d="m3 5 4 4 4-4" />
+          </svg>
+        </button>
+        <div id="log-body" class="log-body">
+          <div class="log-overview">
+            <span id="log-verdict-kicker" class="panel-section-title">目标判定</span>
+            <strong id="log-verdict-title">尚未推演</strong>
+            <p id="log-verdict-text">按空格或点击运行推演，系统会依次结算风场、垂直运动与降水。</p>
+            <div id="log-recommendation" class="log-recommendation"></div>
+          </div>
+          <div id="log-stages" class="log-stages">
+            <article class="log-stage empty">
+              <header><span>1</span><strong>风场</strong></header>
+              <p>等待推演</p>
+            </article>
+            <article class="log-stage empty">
+              <header><span>2</span><strong>上升 / 下沉</strong></header>
+              <p>等待推演</p>
+            </article>
+            <article class="log-stage empty">
+              <header><span>3</span><strong>降水</strong></header>
+              <p>等待推演</p>
+            </article>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div id="entity-popover" class="entity-popover" hidden></div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <div id="campaign-overlay" class="campaign-overlay" hidden>
+      <div class="campaign-page" role="dialog" aria-modal="true" aria-labelledby="campaign-title">
+        <header class="campaign-head">
+          <div>
+            <span class="panel-section-title">关卡总览</span>
+            <h2 id="campaign-title">气象推演 · 全战役</h2>
+            <p>全 72 关已开放：基础系统、基础组合、四类系统、高空环境、真实案例与高难度综合。完成第 13 关后，第 14～72 关可自由进入。</p>
+          </div>
+          <button id="campaign-close" class="campaign-close" type="button" aria-label="关闭关卡总览">×</button>
+        </header>
+        <div id="campaign-stages" class="campaign-stages"></div>
+        <footer class="campaign-foot">
+          <span><i class="dot completed"></i>已完成</span>
+          <span><i class="dot current"></i>当前可玩</span>
+          <span><i class="dot locked"></i>未解锁</span>
+          <span><i class="dot placeholder"></i>尚未实现</span>
+          <span class="campaign-scroll-hint">向下滚动查看全部关卡</span>
+        </footer>
+      </div>
+    </div>
+
+    <div id="manual-overlay" class="manual-overlay" hidden>
+      <div class="manual-page" role="dialog" aria-modal="true" aria-labelledby="manual-title">
+        <header class="manual-head">
+          <div>
+            <span class="panel-section-title">SYSTEM MANUAL</span>
+            <h2 id="manual-title">气象推演操作手册</h2>
+          </div>
+          <button id="manual-close" class="manual-close" type="button" aria-label="关闭操作手册">[ X ]</button>
+        </header>
+
+        <div class="manual-body">
+          <section class="manual-section">
+            <h3><i>01</i>核心玩法：推演规则</h3>
+            <blockquote>“你只负责气压差，剩下的交给大气。”</blockquote>
+            <p>
+              这不是直接控制天气的游戏。你只需在连续天气图上放置天气系统（摆下“因”），点击运行后，底层物理引擎将按
+              按<b>风与输送 → 垂直运动 → 凝结降水</b>三个诊断视角读取同一份状态（得到“果”）。
+            </p>
+            <p>你的目标是观察推演结果，调整系统布局，达成关卡指定的天气现象。</p>
+          </section>
+
+          <section class="manual-section">
+            <h3><i>02</i>数据面板：字母含义</h3>
+            <p>当鼠标悬停在任意网格或城市时，右侧面板会显示实时气象数据：</p>
+            <dl class="manual-letters">
+              <div class="manual-letter">
+                <dt><b>P</b><span>Pressure</span></dt>
+                <dd>气压。驱动风的根本原因，单位 <em>hPa</em>。</dd>
+              </div>
+              <div class="manual-letter">
+                <dt><b>T</b><span>Temperature</span></dt>
+                <dd>温度。决定降水形态（雨/雪/雹）及空气密度。</dd>
+              </div>
+              <div class="manual-letter">
+                <dt><b>Q</b><span>Water Vapor</span></dt>
+                <dd>水汽供应指数，降水的原料。实际凝结只取 <em>min(Q, 4qSat)</em>，单位按 <em>g/m³</em> 等效显示。</dd>
+              </div>
+              <div class="manual-letter">
+                <dt><b>W</b><span>Vertical Index</span></dt>
+                <dd>垂直运动指数。正值为上升（易雨），负值为下沉（易晴）；无量纲，不是 m/s。</dd>
+              </div>
+              <div class="manual-letter">
+                <dt><b>R</b><span>Precipitation</span></dt>
+                <dd>降水率。每回合（3 小时）的降水强度，<em>mm/3h</em>；24 小时等效 = R × 8。</dd>
+              </div>
+            </dl>
+          </section>
+
+          <section class="manual-section">
+            <h3><i>03</i>核心系统：模块作用</h3>
+            <div class="manual-modules">
+              <div class="manual-module">
+                <strong>H / L</strong>
+                <p>
+                  高压（反气旋）与低压（气旋）。高压辐散下沉，带来晴朗；低压辐合上升，吸聚水汽。分为冷高压/暖高压、冷低压/暖低压，其垂直深浅结构不同。同类气压中心几乎重叠时会合并成更大的系统，而不是无限加深；想让低压更深，要靠高空槽、急流出口或凝结潜热。
+                </p>
+              </div>
+              <div class="manual-module">
+                <strong>气团与水汽 <span>Air Mass · Moisture</span></strong>
+                <p><b>气团卡</b>只负责冷热：负值为冷气团、正值为暖气团。<b>水汽卡</b>是独立的附加水汽源（+20 / +40），有自己的落点与范围，可以单独放在上风方向。两张卡叠在同一点就是“冷湿”或“暖湿”气团——锋面仍由冷、暖两张气团卡的偶极子构成。</p>
+                <p>两团温度相反的气团相遇会自动生成锋面：冷楔暖（冷锋）雨急，暖爬冷（暖锋）雨缓，势力相当为准静止锋；冷空气从西北、西南两侧包卷时生成<b>锢囚锋</b>（紫色）。水汽受风场驱动向下风方向输送，降水会消耗水汽：一场雨之后湿区会变干，连阴雨必须持续补充；两张水汽卡落在同一点会<b>合并成一个更大的湿区</b>，而不是更湿。</p>
+              </div>
+              <div class="manual-module">
+                <strong>台 <span>Tropical Cyclone</span></strong>
+                <p>台风不是一张牌，而是一个阶段：<b>暖低压在 ≥26.5℃ 的海面连续降水两回合</b>后升级为热带气旋。之后中心气压 −20/−35/−50 hPa，眼区下沉、眼墙环升、双螺旋雨带自带水汽；暖海每回合增强，登陆或进入冷水减弱；随高空急流与 β 漂移移动。</p>
+              </div>
+              <div class="manual-module">
+                <strong>高空环境</strong>
+                <p>高空槽（诱使低压加深）、高空脊（压制对流）、层结（制造不稳定；上暖下冷可提供冻雨暖鼻）、急流（一条<b>贯穿图幅的带</b>：左出口与右入口辐散上升，右出口与左入口辐合下沉；选中后可在属性面板旋转轴向，轴向应与等温线近平行）。</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="manual-section">
+            <h3><i>04</i>界面导览：工作台布局</h3>
+            <div class="manual-layout">
+              <div class="manual-layout-card">
+                <b>左侧 · 天气系统库</b>
+                <p>拖拽地面与高空系统到地图。双击实体可进入“捏形编辑”，拉伸实体可制造高压脊/低压槽。</p>
+              </div>
+              <div class="manual-layout-card">
+                <b>中央 · 连续天气图</b>
+                <p>无网格的连续地图。显示等压线、风羽、锋面与降水区。包含城市点与地形（山地/海洋）。</p>
+              </div>
+              <div class="manual-layout-card">
+                <b>右侧 · 目标与数据站</b>
+                <p>顶部查看当前关卡目标；下方显示选中城市的实时气象数值与<b>物理一致性评分</b>（0–100，≥90 记三星）。评分只检查物理约束是否自洽，不改变通关判定。</p>
+              </div>
+              <div class="manual-layout-card">
+                <b>底部 · 系统日志</b>
+                <p>展开可查看推演的因果链（如“W 不足导致未降水”），支持 Ctrl+Z 回退重试。关卡进度与棋盘局面会自动保存在本地，刷新页面后可从中断处继续。</p>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <footer class="manual-foot">按 Esc 或点击右上角 [ X ] 关闭</footer>
+      </div>
+    </div>
+
+    <div id="stage-complete" class="modal-layer" hidden>
+      <div class="stage-complete-card" role="dialog" aria-modal="true" aria-labelledby="stage-complete-title">
+        <div class="stage-complete-mark">
+          <svg viewBox="0 0 48 48" fill="none">
+            <circle cx="24" cy="24" r="20" />
+            <path d="m15 24 6 6 12-13" />
+          </svg>
+        </div>
+        <span id="stage-complete-kicker" class="panel-section-title">阶段完成</span>
+        <h2 id="stage-complete-title">全部推演完成</h2>
+        <p id="stage-complete-copy">
+          全部 72 关已完成。
+        </p>
+        <div class="stage-complete-stats">
+          <div><strong id="stage-complete-count">50</strong><span>已完成关卡</span></div>
+          <div><strong>13</strong><span>基础系统</span></div>
+          <div><strong>12</strong><span>基础组合</span></div>
+          <div><strong>4</strong><span>四类系统</span></div>
+          <div><strong>16</strong><span>高空环境</span></div>
+          <div><strong>5</strong><span>真实案例</span></div>
+        </div>
+        <div class="stage-complete-actions">
+          <button id="stage-replay" class="result-secondary" type="button">从第 1 关重玩</button>
+          <button id="stage-close" class="result-primary" type="button">留在当前关</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

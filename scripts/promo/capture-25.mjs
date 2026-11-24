@@ -1,0 +1,41 @@
+import { chromium } from 'playwright-core';
+import path from 'node:path';
+const OUT = path.resolve('capture', 'raw');
+const browser = await chromium.launch({ channel: 'chrome', headless: true, args: ['--force-color-profile=srgb', '--hide-scrollbars'] });
+const context = await browser.newContext({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 2, locale: 'zh-CN', timezoneId: 'Asia/Shanghai', colorScheme: 'dark' });
+await context.addInitScript(() => {
+  localStorage.setItem('aerosphere.completed-levels.v2', JSON.stringify(Array.from({ length: 18 }, (_, i) => i + 1)));
+  localStorage.setItem('aerosphere.settings.v1', JSON.stringify({ speed: 1 }));
+});
+const page = await context.newPage();
+await page.goto('http://127.0.0.1:4180/?level=25', { waitUntil: 'networkidle' });
+await page.evaluate(() => document.fonts.ready);
+await page.waitForTimeout(1800);
+await page.evaluate(() => {
+  const c = window.__weatherController;
+  c.scene.setAnimationSpeed(1);
+  c.chooseVariant('H', 'warmHigh');
+  c.chooseStrength('H', 20);
+  c.placeAt(520, 322, 'H');
+  c.chooseVariant('L', 'coldLow');
+  c.chooseStrength('L', 20);
+  c.placeAt(150, 322, 'L');
+  c.clearPlacement();
+});
+await page.waitForTimeout(800);
+await page.screenshot({ path: path.join(OUT, '25-valley-wind-before.png') });
+await page.evaluate(() => window.__weatherController.runRound());
+await page.waitForTimeout(1500);
+await page.screenshot({ path: path.join(OUT, '25-valley-wind-running.png') });
+await page.waitForTimeout(2400);
+await page.evaluate(() => { window.__weatherController.hideTooltip(); window.__weatherController.hideEntityPopover(); });
+await page.waitForTimeout(250);
+await page.screenshot({ path: path.join(OUT, '25-valley-wind-result.png') });
+console.log(await page.evaluate(() => {
+  const c = window.__weatherController;
+  return { passed: c.result?.evaluation?.passed, actual: c.result?.evaluation?.actual, detail: c.result?.evaluation?.detail, round: c.round };
+}));
+await page.evaluate(() => window.__weatherController.hideResult());
+await page.waitForTimeout(450);
+await page.screenshot({ path: path.join(OUT, '25-valley-wind-clean.png') });
+await browser.close();

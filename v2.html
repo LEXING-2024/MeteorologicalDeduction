@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#070d13" />
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <meta
+      name="description"
+      content="气象推演 · 卷二 V2：在更大的天气图上注入气压与风，观察系统自己演化。"
+    />
+    <title>气象推演 · 卷一 气压与风</title>
+  </head>
+  <body class="v2-body">
+    <div class="v2-app" id="v2-app">
+      <header class="v2-topbar">
+        <div class="v2-brand">
+          <span class="v2-brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32" fill="none">
+              <circle cx="16" cy="16" r="11.5" stroke="currentColor" stroke-opacity=".35" />
+              <circle cx="16" cy="16" r="6.5" stroke="currentColor" stroke-opacity=".6" />
+              <path d="M16 2.5v6M16 23.5v6M2.5 16h6M23.5 16h6" stroke="currentColor" stroke-opacity=".55" />
+            </svg>
+          </span>
+          <div class="v2-brand-copy">
+            <b>气象推演</b>
+            <span>V2 · 卷一</span>
+          </div>
+        </div>
+
+        <div class="v2-level-nav">
+          <button id="btn-prev-level" class="icon-btn" type="button" title="上一关" aria-label="上一关">‹</button>
+          <div class="v2-level-title">
+            <span id="level-kicker" class="kicker">卷一 · 气压与风</span>
+            <h1 id="level-title">一升一降</h1>
+          </div>
+          <button id="btn-next-level" class="icon-btn" type="button" title="下一关" aria-label="下一关">›</button>
+        </div>
+
+        <div class="v2-top-actions">
+          <span id="top-progress" class="v2-progress">已通过 0 / 12</span>
+          <button id="btn-open-levels" class="ghost-btn" type="button">关卡</button>
+          <button id="btn-open-help" class="ghost-btn" type="button">玩法</button>
+          <a class="ghost-btn v1-link" href="./index.html" title="回到 V1 主线">V1 主线</a>
+        </div>
+      </header>
+
+      <div class="v2-shell">
+        <aside class="v2-panel v2-panel-left" aria-label="关卡简报">
+          <section class="panel-block brief-block">
+            <div class="block-head">
+              <span class="micro-label">本关教学</span>
+              <span id="level-scale" class="scale-chip">M · 中尺度</span>
+            </div>
+            <h2 id="brief-title" class="brief-title">一升一降</h2>
+            <p id="level-teaching" class="brief-teaching"></p>
+            <p id="level-scene" class="brief-scene"></p>
+            <div id="scene-chips" class="scene-chips"></div>
+          </section>
+
+          <section class="panel-block">
+            <div class="block-head">
+              <span class="micro-label">目标过程</span>
+              <span id="goal-status" class="status-pill pending" role="status" aria-live="polite">进行中</span>
+            </div>
+            <ul id="goal-list" class="goal-list"></ul>
+          </section>
+
+          <section class="panel-block">
+            <div class="block-head">
+              <span class="micro-label">提示</span>
+              <span id="hint-count" class="mini-count">1 / 3</span>
+            </div>
+            <ol id="hint-list" class="hint-list"></ol>
+            <button id="btn-hint" class="text-btn" type="button">再提示一条</button>
+          </section>
+
+          <section class="panel-block">
+            <div class="block-head">
+              <span class="micro-label">过程日志</span>
+              <span class="mini-count">本关</span>
+            </div>
+            <ol id="log-list" class="log-list"></ol>
+          </section>
+
+          <section class="panel-block legend-block">
+            <div class="block-head"><span class="micro-label">图例</span></div>
+            <div class="legend-row">
+              <span class="legend-glyph low">L</span><span>低压 · 上升 · 气旋性</span>
+              <span class="legend-glyph high">H</span><span>高压 · 下沉 · 晴空</span>
+            </div>
+            <div class="legend-row legend-rain">
+              <span>雨强</span>
+              <span class="rain-ramp"></span>
+              <span class="legend-ticks"><i>0</i><i>5</i><i>20</i><i>mm/h</i></span>
+            </div>
+            <div class="legend-row legend-wind">
+              <span>风矢</span>
+              <span class="wind-swatch"></span>
+              <span>弱</span><span class="wind-swatch strong"></span><span>强</span>
+            </div>
+          </section>
+        </aside>
+
+        <main class="v2-map" aria-label="天气图">
+          <div class="map-toolbar">
+            <div id="layer-toggles" class="layer-group" role="group" aria-label="图层">
+              <button type="button" class="layer-btn is-on" data-layer="pressure"><i class="layer-dot pressure"></i>气压</button>
+              <button type="button" class="layer-btn is-on" data-layer="wind"><i class="layer-dot wind"></i>风</button>
+              <button type="button" class="layer-btn is-on" data-layer="cloud"><i class="layer-dot cloud"></i>云</button>
+              <button type="button" class="layer-btn is-on" data-layer="rain"><i class="layer-dot rain"></i>雨</button>
+              <button type="button" class="layer-btn is-on" data-layer="temp"><i class="layer-dot temp"></i>气温</button>
+              <button type="button" class="layer-btn is-on" data-layer="terrain"><i class="layer-dot terrain"></i>地形</button>
+            </div>
+            <div class="map-toolbar-right">
+              <div class="map-clock">
+                <span id="clock-hour" class="clock-hour">h+0</span>
+                <span id="clock-local" class="clock-local">08:00</span>
+              </div>
+              <button id="btn-reset-view" class="icon-btn small" type="button" title="复位视图" aria-label="复位视图">⤢</button>
+              <button id="btn-focus-map" class="icon-btn small" type="button" title="专注地图" aria-label="专注地图" aria-pressed="false">⛶</button>
+            </div>
+          </div>
+
+          <div class="map-stage" id="map-stage">
+            <canvas id="map-canvas" aria-label="天气图画布"></canvas>
+            <div id="map-tag" class="map-chip">海平面气压 · 实际气温</div>
+            <div id="history-chip" class="map-chip map-chip-history" hidden>回看中</div>
+            <div id="map-readout" class="map-readout" hidden></div>
+            <div id="placement-toast" class="placement-toast" hidden>
+              <b>选好落点</b><span>点击放置 · 方向键微调 · 回车确认</span>
+            </div>
+            <div id="map-empty" class="map-empty" hidden>
+              <span class="map-empty-kicker">开始推演</span>
+              <b>先从右侧选一张要素卡</b>
+              <span>再点击地图落点投放；本回合可连续放卡，点“推进”结束</span>
+            </div>
+            <div class="map-hint">
+              <span>滚轮缩放</span><span>拖动平移</span><span>双击复位</span>
+            </div>
+            <div class="terrain-legend" aria-hidden="true">
+              <span class="terrain-legend-title" id="terrain-legend-title">高程</span>
+              <span class="terrain-ramp"></span>
+              <span class="terrain-ticks"><i>0</i><i>500</i><i>1500</i><i>2500m</i></span>
+            </div>
+          </div>
+
+          <div class="timeline-wrap">
+            <div class="timeline-head">
+              <div id="round-pips" class="round-pips" aria-label="回合进度"></div>
+              <div class="round-info">
+                <span id="round-info">第 1 / 3 回合</span>
+                <span id="round-sub" class="round-sub">每回合 3 小时</span>
+              </div>
+              <div class="timeline-controls">
+                <span id="timeline-note" class="timeline-note">当前 h+0</span>
+                <button id="btn-play" class="timeline-btn" type="button" aria-label="播放时间轴">▶</button>
+                <button id="btn-speed" class="timeline-btn" type="button" aria-label="播放倍速 1 倍">1×</button>
+              </div>
+              <div class="map-actions">
+                <button id="btn-skip" class="ghost-btn" type="button">跳过本回合</button>
+                <button id="btn-advance" class="primary-btn" type="button">推进 3 小时</button>
+              </div>
+            </div>
+            <div id="timeline-track" class="timeline-track" aria-label="时间轴"></div>
+            <input id="timeline-scrub" class="timeline-scrub" type="range" min="0" max="0" value="0" step="1" aria-label="拖动时间轴" />
+          </div>
+        </main>
+
+        <aside class="v2-panel v2-panel-right" aria-label="要素与观测">
+          <section class="panel-block deck-block">
+            <div class="block-head">
+              <span class="micro-label">要素卡</span>
+              <span id="deck-hint" class="mini-count">选卡后点地图</span>
+            </div>
+            <div id="card-grid" class="card-grid"></div>
+            <div id="wind-dir" class="wind-dir" hidden>
+              <div class="wind-dir-head">
+                <span>急流流向</span>
+                <b id="wind-dir-label">东</b>
+              </div>
+              <div id="wind-dir-grid" class="wind-dir-grid"></div>
+            </div>
+          </section>
+
+          <section class="panel-block stations-block">
+            <div class="block-head">
+              <span class="micro-label">站点观测</span>
+              <span class="mini-count">h+<b id="station-hour">0</b></span>
+            </div>
+            <div id="station-list" class="station-list"></div>
+          </section>
+
+          <section class="panel-block diagnostics-block">
+            <div class="block-head">
+              <span class="micro-label">场诊断</span>
+              <span class="mini-count">域内极值</span>
+            </div>
+            <div id="diag-grid" class="diag-grid"></div>
+            <div id="recipe-list" class="recipe-list"></div>
+          </section>
+        </aside>
+      </div>
+    </div>
+
+    <div id="level-drawer" class="drawer" hidden>
+      <div class="drawer-backdrop" data-close-drawer></div>
+      <div class="drawer-panel" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
+        <header class="drawer-head">
+          <div>
+            <span class="micro-label">卷一 · 气压与风</span>
+            <h2 id="drawer-title">选择关卡</h2>
+          </div>
+          <button class="icon-btn" type="button" data-close-drawer aria-label="关闭关卡列表">×</button>
+        </header>
+        <p class="drawer-note">12 个关卡从升降直觉走到综合读图。关卡之间不锁定，可随时回来重做。</p>
+        <div id="level-grid" class="level-grid"></div>
+        <footer class="drawer-foot">
+          <span id="drawer-progress">已通过 0 / 12</span>
+          <span>进度保存在本机浏览器</span>
+        </footer>
+      </div>
+    </div>
+
+    <div id="help-modal" class="modal" hidden>
+      <div class="modal-backdrop" data-close-help></div>
+      <div class="modal-card help-card" role="dialog" aria-modal="true" aria-labelledby="help-title">
+        <header class="modal-head">
+          <div>
+            <span class="micro-label">操作与读图</span>
+            <h2 id="help-title">怎么玩</h2>
+          </div>
+          <button class="icon-btn" type="button" data-close-help aria-label="关闭玩法说明">×</button>
+        </header>
+        <div class="help-grid">
+          <section>
+            <h3>放置</h3>
+            <p>点击右侧要素卡，再点击地图落点。每回合最多一张，放置后自动演化 3 小时。</p>
+            <p>气压卡改变气压场；低空急流会沿指定方向注入一条强风带。暖核与冷核的降水效率不同。</p>
+          </section>
+          <section>
+            <h3>回合</h3>
+            <p>每关 3–4 回合。没有放卡也可以“跳过本回合”。演化结束后自动判题，只给达成 / 未通过，没有星级。</p>
+            <p>时间轴可回看任意小时；回看时不能继续放置，回到最右端即可操作。</p>
+            <p>时间轴支持播放 / 暂停、1× / 2× / 4× 倍速和拖动滑块。播放只改变回看帧，不会跳过回合或重复消耗卡片。</p>
+          </section>
+          <section>
+            <h3>读图</h3>
+            <p>等压线是海平面实际气压（hPa，如 1004 hPa），低于 1000 hPa 为蓝色、高于 1000 hPa 为暖色。H / L 为闭合中心，虚线圆是等效半径。</p>
+            <p>气温层用实际 2 m 气温色带并画等温线；站点数字是“实际气压 · 实际气温”。“体感”计入风寒与蒸发冷却，“温度平流”给出风把冷 / 暖空气搬运到该处的速率。</p>
+            <p>风矢按风速着色；云与雨是当前小时场。滚轮缩放、拖动平移、双击复位。</p>
+            <p>降水按当前格点占优相态着色：雨、雨夹雪、雪、冻雨、冰雹；站点卡显示累计水当量与相态。PW 由 1000 / 850 / 700 / 500 / 300 hPa 五层实际比湿积分（mm），不再用单层 q 的气候廓线冒充。</p>
+            <p>850 / 700 / 500 hPa 温度是独立层场，不是地面温度加常数偏移；悬停读数会给出 850 / 500 hPa 层温。带层结的场景会按层温判相态。</p>
+          </section>
+          <section>
+            <h3>键盘</h3>
+            <p><kbd>1</kbd>–<kbd>5</kbd> 选卡 · <kbd>方向键</kbd> 微调落点（按住 <kbd>Shift</kbd> 走 5 km） · <kbd>回车</kbd> / <kbd>空格</kbd> 放置 · <kbd>空格</kbd> 推进回合 · <kbd>Esc</kbd> 取消选择 / 关闭弹层 · <kbd>R</kbd> 复位视图</p>
+          </section>
+        </div>
+        <footer class="modal-foot">
+          <span class="hint-inline">目标不是“摆对卡”，而是让过程链自己成立。</span>
+          <button class="primary-btn" type="button" data-close-help>知道了</button>
+        </footer>
+      </div>
+    </div>
+
+    <div id="result-modal" class="modal" hidden>
+      <div class="modal-backdrop"></div>
+      <div class="modal-card result-card" role="dialog" aria-modal="true" aria-labelledby="result-title">
+        <header class="result-head">
+          <span id="result-badge" class="result-badge">过程成立</span>
+          <h2 id="result-title">一升一降</h2>
+          <p id="result-detail"></p>
+        </header>
+        <ul id="result-checks" class="result-checks"></ul>
+        <div class="result-recipes">
+          <span class="micro-label">识别到的过程</span>
+          <div id="result-recipes" class="recipe-chips"></div>
+        </div>
+        <footer class="modal-foot">
+          <button id="btn-result-review" class="ghost-btn" type="button">回看天气图</button>
+          <div class="result-actions">
+            <button id="btn-result-retry" class="ghost-btn" type="button">重试本关</button>
+            <button id="btn-result-next" class="primary-btn" type="button">下一关</button>
+          </div>
+        </footer>
+      </div>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+    <script type="module" src="./src/v2/main.ts"></script>
+  </body>
+</html>

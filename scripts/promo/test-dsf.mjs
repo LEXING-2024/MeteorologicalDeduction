@@ -1,0 +1,10 @@
+import { chromium } from 'playwright-core';
+import path from 'node:path';
+const browser = await chromium.launch({ channel: 'chrome', headless: true });
+const ctx = await browser.newContext({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 2 });
+const page = await ctx.newPage();
+await page.goto('http://127.0.0.1:5173/?level=10', { waitUntil: 'networkidle' });
+await page.waitForTimeout(1800);
+await page.screenshot({ path: path.resolve('capture/test-dsf2.png') });
+console.log(await page.evaluate(() => ({ dpr: devicePixelRatio, inner: [innerWidth, innerHeight], canvas: [...document.querySelectorAll('canvas')].map(c => [c.width, c.height, c.getBoundingClientRect().width]) })));
+await browser.close();

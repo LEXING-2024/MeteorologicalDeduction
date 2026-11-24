@@ -1,0 +1,10 @@
+node_modules/
+dist/
+shots/
+*.log
+.vite/
+.DS_Store
+Thumbs.db
+.workbuddy/tmp/
+publish/
+capture/
